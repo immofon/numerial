@@ -11,3 +11,6 @@ double poly_value(double a[],int n, double x);
 
 // MUST free after use its return.
 double* exp_taylor(int n);
+
+
+double vec_dot_product(double a[], double b[], int dim);

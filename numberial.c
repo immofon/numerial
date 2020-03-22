@@ -23,3 +23,12 @@ double* exp_taylor(int n) {
 	}
 	return a;
 }
+
+
+double vec_dot_product(double a[], double b[], int dim) {
+	double sum = 0;
+	for (int i = 0;i < dim; i++) {
+		sum += a[i]*b[i];
+	}
+	return sum;
+}
