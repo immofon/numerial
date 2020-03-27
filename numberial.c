@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include "numberial.h"
 
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
@@ -53,28 +54,71 @@ void print_double(const char* format,double v) {
 
 	free(fmt);
 }
+// MUST call free_mat after using.
+mat_t new_mat(int m,int n) {
+	assert(m>0);
+	assert(n>0);
+
+	mat_t mat;
+	mat.m = m;
+	mat.n = n;
+	mat.data = new(double,m*n);
+	return mat;
+}
+void free_mat(mat_t* mat) {
+	if(mat->data == NULL) {
+		return;
+	}
+
+	free(mat->data);
+	mat->data = NULL;
+}
 
 
-void mat_println(const char* format,double* mat,int m,int n) {
+
+// R = A*B
+// return: 0(error) 1(ok)
+// ADVICE: assert(mat_product(R,A,B);
+int mat_product(mat_t R,mat_t A,mat_t B) {
+
+	int i,j,k;
+	double sum;
+	if (R.m != A.m || R.n != B.n || A.n != B.m) {
+		return 0;
+	}
+
+	range(i,1,A.m,1) range(j,1,B.n,1) {
+		sum = 0;
+		range(k,1,A.n,1) {
+			sum += mat_v(A,i,k) * mat_v(B,k,j);
+		}
+		mat_v(R,i,j) = sum;
+	}
+	return 1;
+}
+
+
+// format: "12.8" default if format == NULL
+void mat_println(const char* format,mat_t mat){
 	int i,j;
 
-	if (format == 0 ) {
+	if (format == NULL ) {
 		format = "12.8";
 	}
 
-	each(i,m) {
-		if (i == 0) {
+	range(i,1,mat.m,1) {
+		if (i == 1) {
 			printf("[");
 		}else {
 			printf(" ");
 		}
 
-		each(j,n) {
-			print_double(format,mat_v(mat,n,i,j));
+		range(j,1,mat.n,1) {
+			print_double(format,mat_v(mat,i,j));
 			printf(" ");
 		}
 
-		if (i == (m-1)) {
+		if (i == mat.m) {
 			printf("]");
 		}
 
