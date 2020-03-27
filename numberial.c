@@ -74,7 +74,35 @@ void free_mat(mat_t* mat) {
 	mat->data = NULL;
 }
 
+mat_t new_mat_clone(mat_t src) {
+	assert(src.data != NULL);
 
+	mat_t R = new_mat(src.m,src.n);
+	assert(mat_copy(R,src));
+	return R;
+}
+
+int mat_is_same_size(mat_t A,mat_t B) {
+	return A.m == B.m && A.n == B.n;
+}
+
+int mat_is_same_size_3(mat_t A,mat_t B,mat_t C) {
+	return mat_is_same_size(A,B) && mat_is_same_size(B,C);
+}
+
+// share same memories.
+int mat_is_identical(mat_t A,mat_t B) {
+	if(!mat_is_same_size(A,B)) {
+		return 0;
+	}
+	if(A.data == NULL || B.data == NULL) {
+		return 0;
+	}
+	if(A.data == B.data) {
+		return 1;
+	}
+	return 0;
+}
 
 // R = A*B
 // return: 0(error) 1(ok)
@@ -83,6 +111,9 @@ int mat_product(mat_t R,mat_t A,mat_t B) {
 
 	int i,j,k;
 	double sum;
+	if(mat_is_identical(R,A) || mat_is_identical(R,B)) {
+		return 0;
+	}
 	if (R.m != A.m || R.n != B.n || A.n != B.m) {
 		return 0;
 	}
@@ -97,6 +128,20 @@ int mat_product(mat_t R,mat_t A,mat_t B) {
 	return 1;
 }
 
+
+// R = A+B
+// R can be A or B.
+int mat_add(mat_t R,mat_t A,mat_t B){
+	int i,j;
+	if(!mat_is_same_size_3(R,A,B)) {
+		return 0;
+	}
+
+	mat_each(R,i,j) {
+		mat_v(R,i,j) = mat_v(A,i,j) + mat_v(B,i,j);
+	}
+	return 1;
+}
 
 // format: "12.8" default if format == NULL
 void mat_println(const char* format,mat_t mat){
@@ -125,3 +170,29 @@ void mat_println(const char* format,mat_t mat){
 		printf("\n");
 	}
 }
+
+int mat_assign(mat_t mat,double* data) {
+	assert(mat.data != NULL);
+	assert(data != NULL);
+
+	int size = mat.m * mat.n-1;
+	int i;
+	range(i,0,size,1) {
+		mat.data[i] = data[i];
+	}
+	return 1;
+}
+
+int mat_copy(mat_t dst,mat_t src) {
+	if (dst.m != dst.m || src.n != src.n) {
+		return 0;
+	}
+
+	if (dst.data == NULL || src.data == NULL) {
+		return 0;
+	}
+
+	return mat_assign(dst,src.data);
+}
+
+
