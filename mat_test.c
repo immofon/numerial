@@ -76,6 +76,12 @@ int main() {
 	init_mat(I,i,j,i==j?1:0);
 	mat_println(".0",I);
 
+	mat_t b = new_mat_vec(4);
+	double b_v[] = {1,2,3,4};
+	assert(mat_assign(b,b_v));
+	mat_println(".0",b);
+
+
 	free_mat(&A);
 	free_mat(&B);
 	free_mat(&C);

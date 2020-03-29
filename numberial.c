@@ -74,6 +74,11 @@ void free_mat(mat_t* mat) {
 	mat->data = NULL;
 }
 
+// vertical vector
+mat_t new_mat_vec(int n)  {
+	return new_mat(n,1);
+}
+
 mat_t new_mat_clone(mat_t src) {
 	assert(src.data != NULL);
 
@@ -195,4 +200,267 @@ int mat_copy(mat_t dst,mat_t src) {
 	return mat_assign(dst,src.data);
 }
 
+double _mat_inter_product(mat_t A, mat_t B,int i,int j) {
+	assert(A.m == B.m);
+	assert(1<=i & i <= A.n);
+	assert(1<=j & j <= B.n);
 
+	int k;
+	double sum = 0;
+	range(k,1,A.m,1) {
+		sum += mat_v(A,k,i)*mat_v(B,k,j);
+	}
+	return sum;
+}
+
+// T can be A.
+int mat_transpose(mat_t T, mat_t A) {
+	if (T.m != A.n || T.n != A.m) {
+		return 0;
+	}
+
+	double tmp;
+	int i,j;
+
+	if (mat_is_identical(T,A) && A.m == A.n) {
+		range(i,1,A.n,1) range(j,i+1,A.n,1) {
+			tmp = mat_v(A,i,j);
+			mat_v(A,i,j)= mat_v(A,j,i);
+			mat_v(A,j,i)= tmp;
+		}
+		return 1;
+	}
+
+	mat_each(T,i,j) {
+		mat_v(T,i,j) = mat_v(A,j,i);
+	}
+	return 1;
+}
+
+int mat_reduction_qr(mat_t Q,mat_t R,mat_t A) {
+	if(!mat_is_same_size(Q,A)) {
+		return 0;
+	}
+	if(R.m != A.n || R.n != A.n) {
+		return 0;
+	}
+
+	int i,j,k,n;
+	double tmp;
+	mat_t T = new_mat_vec(A.n);
+
+	init_mat(R,i,j,i<=j ? 1:0);
+
+	range(i,1,Q.m,1) {
+		mat_v(Q,i,1) = mat_v(A,i,1);
+	}
+
+	vec_v(T,1) = _mat_inter_product(Q,Q,1,1);
+
+	range(k,2,Q.n,1) {
+		range(i,1,k-1,1) {
+			mat_v(R,i,k) = _mat_inter_product(A,Q,k,i) / vec_v(T,i);
+		}
+
+		range(i,1,Q.m,1) {
+			tmp = mat_v(A,i,k);
+			range(j,1,k-1,1) {
+				tmp -= mat_v(R,j,k) * mat_v(Q,i,j);
+			}
+			mat_v(Q,i,k) = tmp;
+		}
+
+		vec_v(T,k) = _mat_inter_product(Q,Q,k,k);
+	}
+
+	range(i,1,T.m,1) {
+		vec_v(T,i) = sqrt(vec_v(T,i));
+	}
+
+	mat_each(Q,i,j) {
+		mat_v(Q,i,j) /= vec_v(T,j);
+	}
+	mat_each(R,i,j) {
+		mat_v(R,i,j) *= vec_v(T,i);
+	}
+	return 1;
+}
+
+
+int mat_back_solution(mat_t A,mat_t x,mat_t b) {
+	if (x.n != 1 || b.n != 1 ||  A.m != A.n || x.m != b.m) {
+		return 0;
+	}
+
+	int j,k;
+	double tmp;
+
+	vec_v(x,A.n) = vec_v(b,A.n) / mat_v(A,A.n,A.n);
+
+	for (k = A.n - 1; k >= 1; k--) {
+		tmp = vec_v(b,k);
+		range(j,k+1,A.n,1) {
+			tmp -= mat_v(A,k,j) * vec_v(x,j);
+		}
+		vec_v(x,k) = tmp / mat_v(A,k,k);
+	}
+	return 1;
+}
+
+// T cannot be A.
+int mat_inv_qr(mat_t T,mat_t A) {
+	if (A.m != A.n || T.m != T.n || A.m != T.m) {
+		return 0;
+	}
+
+	int i,j,k;
+	// use goto to return.
+	mat_t Q = new_mat(A.n,A.n);
+	mat_t R = new_mat(A.n,A.n);
+	mat_t E = new_mat_vec(A.n);
+	mat_t b = new_mat_vec(A.n);
+
+	if(!mat_reduction_qr(Q,R,A)) {
+		goto ERROR;
+	}
+
+	if(!mat_transpose(Q,Q)) {
+		goto ERROR;
+	}
+
+	range(j,1,A.n,1) {
+		range(i,1,A.n,1) {
+			vec_v(E,i) = i ==j ? 1:0;
+		}
+
+		if(!mat_product(b,Q,E)){
+			goto ERROR;
+		}
+
+		if(!mat_back_solution(R,E,b)) {
+			goto ERROR;
+		}
+
+		range(i,1,A.n,1) {
+			mat_v(T,i,j) = vec_v(E,i);
+		}
+	}
+	goto OK;
+
+
+	int ret;
+	if(0==0){
+OK:
+		ret = 1;
+	}else {
+ERROR:
+		ret = 0;
+	}
+	free_mat(&Q);
+	free_mat(&R);
+	return ret;
+}
+
+
+int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A) {
+	if(R.m != A.m || R.n != A.n) {
+		return 0;
+	}
+
+	if(R.n != A.m || R.m != R.n) {
+		return 0;
+	}
+
+	int i,j,k;
+	double xi,xj,c,s,u;
+
+	if(!mat_copy(R,A)) {
+		return 0;
+	}
+
+	init_mat(Q,i,j,i==j?1:0);
+
+	range(k,1,A.n,1) range(i,k+1,A.m,1) {
+		xi = mat_v(R,k,k);
+		xj = mat_v(R,i,k);
+		u = sqrt(xi*xi + xj*xj);
+
+		if (u > 1E-8) {
+			c = xi/u;
+			s = xj/u;
+
+			range(j,1,A.n,1) {
+				xi = mat_v(R,k,j);
+				xj = mat_v(R,i,j);
+				mat_v(R,k,j) = c*xi + s*xj;
+				mat_v(R,i,j) = c*xj - s*xi;
+
+				xi = mat_v(Q,k,j);
+				xj = mat_v(Q,i,j);
+				mat_v(Q,k,j) = c*xi + s*xj;
+				mat_v(Q,i,j) = c*xj - s*xi;
+			}
+		}
+	}
+
+	if(!mat_transpose(Q,Q)) {
+		return 0;
+	}
+	return 1;
+}
+
+// T cannot be A.
+int mat_inv_qr_givens(mat_t T,mat_t A) {
+	if (A.m != A.n || T.m != T.n || A.m != T.m) {
+		return 0;
+	}
+
+	int i,j,k;
+	// use goto to return.
+	mat_t Q = new_mat(A.n,A.n);
+	mat_t R = new_mat(A.n,A.n);
+	mat_t E = new_mat_vec(A.n);
+	mat_t b = new_mat_vec(A.n);
+
+	if(!mat_reduction_qr_givens(Q,R,A)) {
+		goto ERROR;
+	}
+
+	if(!mat_transpose(Q,Q)) {
+		goto ERROR;
+	}
+
+	range(j,1,A.n,1) {
+		range(i,1,A.n,1) {
+			vec_v(E,i) = i ==j ? 1:0;
+		}
+
+		if(!mat_product(b,Q,E)){
+			goto ERROR;
+		}
+
+		if(!mat_back_solution(R,E,b)) {
+			goto ERROR;
+		}
+
+		range(i,1,A.n,1) {
+			mat_v(T,i,j) = vec_v(E,i);
+		}
+	}
+	goto OK;
+
+
+	int ret;
+	if(0==0){
+OK:
+		ret = 1;
+	}else {
+ERROR:
+		ret = 0;
+	}
+	free_mat(&Q);
+	free_mat(&R);
+	free_mat(&E);
+	free_mat(&b);
+	return ret;
+}

@@ -34,6 +34,9 @@ typedef struct{
 // MUST call free_mat after using.
 mat_t new_mat(int m,int n);
 mat_t new_mat_clone(mat_t src);
+mat_t new_mat_vec(int n); // vertical vector
+
+#define vec_v(mat,i) (mat.data[(i)-1])
 
 void free_mat(mat_t* mat);
 
@@ -58,6 +61,18 @@ int mat_is_same_size_3(mat_t A,mat_t B,mat_t C) ;
 // share same memories.
 int mat_is_identical(mat_t A,mat_t B);
 
+// T can be A.
+int mat_transpose(mat_t T, mat_t A);
+
+int mat_reduction_qr(mat_t Q,mat_t R,mat_t A);
+
+int mat_back_solution(mat_t A,mat_t x,mat_t b);
+
+// T cannot be A.
+int mat_inv_qr(mat_t T,mat_t A);
+
+int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A);
+int mat_inv_qr_givens(mat_t T,mat_t A);
 
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
 // len(P) = n+1
@@ -69,3 +84,4 @@ double* exp_taylor(int n);
 
 
 double vec_dot_product(double a[], double b[], int dim);
+
