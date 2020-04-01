@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "numberial.h"
+#include "numerial.h"
 
 #define M  2
 #define N  2

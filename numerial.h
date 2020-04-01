@@ -43,6 +43,12 @@ void free_mat(mat_t* mat);
 // format: "12.8" default if format == NULL
 void mat_println(const char* format,mat_t mat);
 
+// share same memories.
+int mat_is_identical(mat_t A,mat_t B);
+
+// T can be A.
+int mat_transpose(mat_t T, mat_t A);
+
 // R = A*B
 // R should not be A or B.
 // return: 0(error) 1(ok)
@@ -57,13 +63,6 @@ int mat_assign(mat_t mat,double* data);
 int mat_copy(mat_t dst,mat_t src);
 int mat_is_same_size(mat_t A,mat_t B) ;
 int mat_is_same_size_3(mat_t A,mat_t B,mat_t C) ;
-
-// share same memories.
-int mat_is_identical(mat_t A,mat_t B);
-
-// T can be A.
-int mat_transpose(mat_t T, mat_t A);
-
 int mat_reduction_qr(mat_t Q,mat_t R,mat_t A);
 
 int mat_back_solution(mat_t A,mat_t x,mat_t b);
@@ -84,4 +83,3 @@ double* exp_taylor(int n);
 
 
 double vec_dot_product(double a[], double b[], int dim);
-

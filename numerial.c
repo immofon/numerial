@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
-#include "numberial.h"
+#include "numerial.h"
 
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
 // len(P) = n+1
