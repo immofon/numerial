@@ -3,6 +3,22 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include <time.h>
+
+// return with resouce free
+#define HANDLE_MUST(varname) int varname;\
+	if(0==0){ \
+		OK: \
+		varname = 1; \
+	}else { \
+		ERROR: \
+		varname = 0; \
+	}
+
+#define MUST_return_ok() goto OK
+#define MUST_return_error() goto ERROR
+#define MUST(exp) if(!(exp)) {MUST_return_error();}
+
 
 #define new(type,size) ((type *) malloc(sizeof(type)*(size)))
 
@@ -72,6 +88,8 @@ int mat_inv_qr(mat_t T,mat_t A);
 
 int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A);
 int mat_inv_qr_givens(mat_t T,mat_t A);
+
+int mat_solve_qr(mat_t x,mat_t A,mat_t b, int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));
 
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
 // len(P) = n+1
