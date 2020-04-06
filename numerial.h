@@ -40,7 +40,7 @@ typedef struct{
 // i,j are both one-based.
 #define mat_v(mat,i,j) (mat.data[(((i)-1)*(mat.n)+((j)-1))])
 
-#define mat_each(mat,i,j) range(i,1,(mat).n,1) range(j,1,(mat).n,1)
+#define mat_each(mat,i,j) range(i,1,(mat).m,1) range(j,1,(mat).n,1)
 
 #define init_mat(mat,i,j,exp) mat_each(mat,i,j) { \
 	mat_v(mat,i,j) = (exp); \
@@ -74,6 +74,10 @@ int mat_product(mat_t R,mat_t A,mat_t B);
 // R = A+B
 // R can be A or B.
 int mat_add(mat_t R,mat_t A,mat_t B);
+
+// R = cA
+// R can be A.
+int mat_scaler(mat_t R,mat_t A,double c);
 
 int mat_assign(mat_t mat,double* data);
 int mat_copy(mat_t dst,mat_t src);

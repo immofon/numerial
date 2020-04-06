@@ -147,6 +147,19 @@ int mat_add(mat_t R,mat_t A,mat_t B){
 	}
 	return 1;
 }
+// R = cA
+// R can be A.
+int mat_scaler(mat_t R,mat_t A,double c) {
+	int i,j;
+	if(!mat_is_same_size(R,A)) {
+		return 0;
+	}
+
+	mat_each(R,i,j) {
+		mat_v(R,i,j) = c * mat_v(A,i,j);
+	}
+	return 1;
+}
 
 // format: "12.8" default if format == NULL
 void mat_println(const char* format,mat_t mat){
@@ -466,6 +479,7 @@ int mat_solve_qr(mat_t x,mat_t A,mat_t b, int (*reduction_qr)(mat_t Q,mat_t R,ma
 	mat_t b1 = new_mat_vec(b.m);
 
 	MUST((*reduction_qr)(Q,R,A));
+	mat_println(".3",R);
 	MUST(mat_transpose(Q,Q));
 	MUST(mat_product(b1,Q,b));
 	MUST(mat_back_solution(R,x,b1));
