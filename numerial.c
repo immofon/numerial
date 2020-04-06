@@ -59,10 +59,12 @@ mat_t new_mat(int m,int n) {
 	assert(m>0);
 	assert(n>0);
 
+	int i,j;
 	mat_t mat;
 	mat.m = m;
 	mat.n = n;
 	mat.data = new(double,m*n);
+	init_mat(mat,i,j,0);
 	return mat;
 }
 void free_mat(mat_t* mat) {
@@ -479,7 +481,6 @@ int mat_solve_qr(mat_t x,mat_t A,mat_t b, int (*reduction_qr)(mat_t Q,mat_t R,ma
 	mat_t b1 = new_mat_vec(b.m);
 
 	MUST((*reduction_qr)(Q,R,A));
-	mat_println(".3",R);
 	MUST(mat_transpose(Q,Q));
 	MUST(mat_product(b1,Q,b));
 	MUST(mat_back_solution(R,x,b1));

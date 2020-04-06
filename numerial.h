@@ -48,9 +48,11 @@ typedef struct{
 
 
 // MUST call free_mat after using.
+// These all will init as 0.
 mat_t new_mat(int m,int n);
-mat_t new_mat_clone(mat_t src);
 mat_t new_mat_vec(int n); // vertical vector
+
+mat_t new_mat_clone(mat_t src);
 
 #define vec_v(mat,i) (mat.data[(i)-1])
 

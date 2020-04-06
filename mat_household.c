@@ -5,7 +5,7 @@ mat_t new_mat_tri(int n) {
 	assert(n > 0);
 
 	mat_t T = new_mat(n,n);
-	int i;
+	int i,j;
 	range(i,1,n,1) {
 		mat_v(T,i,i) = -4;
 	}
@@ -151,8 +151,8 @@ int mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A) {
 }
 
 int main() {
-	int n = 20;
-	int N[] = {5,6,7,8,9,12,10,20,-1};
+	int n;
+	int N[] = {5,10,20,-1};
 	clock_t t;
 	int k = 0;
 	int i;
@@ -175,7 +175,7 @@ int main() {
 		printf("Ax=b; x=\n");
 		mat_println(".12",x);
 
-		printf("time: %fms\n",(((double)(clock() - t)*1000)/CLOCKS_PER_SEC));
+		printf("time: %fms\n\n",(((double)(clock() - t)*1000)/CLOCKS_PER_SEC));
 		free_mat(&A);
 		free_mat(&b);
 		free_mat(&x);
