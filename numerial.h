@@ -77,6 +77,10 @@ int mat_product(mat_t R,mat_t A,mat_t B);
 // R can be A or B.
 int mat_add(mat_t R,mat_t A,mat_t B);
 
+// R = A-B
+// R can be A or B.
+int mat_sub(mat_t R,mat_t A,mat_t B);
+
 // R = cA
 // R can be A.
 int mat_scaler(mat_t R,mat_t A,double c);
@@ -85,15 +89,15 @@ int mat_assign(mat_t mat,double* data);
 int mat_copy(mat_t dst,mat_t src);
 int mat_is_same_size(mat_t A,mat_t B) ;
 int mat_is_same_size_3(mat_t A,mat_t B,mat_t C) ;
-int mat_reduction_qr(mat_t Q,mat_t R,mat_t A);
 
 int mat_back_solution(mat_t A,mat_t x,mat_t b);
 
-// T cannot be A.
-int mat_inv_qr(mat_t T,mat_t A);
-
+int mat_reduction_qr(mat_t Q,mat_t R,mat_t A);
 int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A);
-int mat_inv_qr_givens(mat_t T,mat_t A);
+int mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A);
+
+// T cannot be A.
+int mat_inv_qr(mat_t T,mat_t A,int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));
 
 int mat_solve_qr(mat_t x,mat_t A,mat_t b, int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));
 

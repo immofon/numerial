@@ -47,7 +47,7 @@ int main() {
 	assert(mat_product(c,A,b));
 	mat_println("",c);
 
-	assert(mat_inv_qr(R,A));
+	assert(mat_inv_qr(R,A,&mat_reduction_qr_givens));
 	mat_println("",R);
 
 
