@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <time.h>
 
+void pause();
+
 // return with resouce free
 #define HANDLE_MUST(varname) int varname;\
 	if(0==0){ \

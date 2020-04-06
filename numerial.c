@@ -3,6 +3,15 @@
 #include <assert.h>
 #include "numerial.h"
 
+void pause() {
+#ifdef _WINDOWS__
+	system("PAUSE");
+#endif
+#ifdef _WIN32
+	system("PAUSE");
+#endif
+}
+
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
 // len(P) = n+1
 // n: degree of polynomial
