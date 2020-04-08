@@ -101,40 +101,6 @@ int mat_inv_qr(mat_t T,mat_t A,int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));
 
 int mat_solve_qr(mat_t x,mat_t A,mat_t b, int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));
 
-
-// Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
-// len(P) = n+1
-// n: degree of polynomial
-double poly_value(double a[],int n, double x) {
-	double v = a[0];
-
-	for(int i = 1; i <= n ; i++) {
-		v = x * v + a[i];
-	}
-	return v;
-}
-
-
-// MUST free after use its return.
-double* exp_taylor(int n) {
-	// double *a = (double *)malloc(sizeof(double)*(n+1));
-	double *a = new(double,n+1);
-	a[n] = 1;
-	for (int i = n-1; i>=0; i--) {
-		a[i] = a[i+1] / (n-i);
-	}
-	return a;
-}
-
-
-double vec_dot_product(double a[], double b[], int dim) {
-	double sum = 0;
-	for (int i = 0;i < dim; i++) {
-		sum += a[i]*b[i];
-	}
-	return sum;
-}
-
 void print_double(const char* format,double v) {
 	int i;
 
@@ -691,7 +657,7 @@ mat_t new_mat_tri(int n) {
 }
 
 void pause() {
-#ifdef _WINDOWS__
+#ifdef __WINDOWS_
 	system("PAUSE");
 #endif
 #ifdef _WIN32
@@ -721,15 +687,17 @@ int main() {
 
 		t = clock();
 		assert(mat_solve_qr(x,A,b,&mat_reduction_qr));
+		printf("time: %.12lfms\n",(((double)(clock() - t)*1000)/CLOCKS_PER_SEC));
 		printf("Ax=b; x=\n");
 		mat_println(".12",x);
+		printf("\n");
 
-		printf("time: %fms\n\n",(((double)(clock() - t)*1000)/CLOCKS_PER_SEC));
 		free_mat(&A);
 		free_mat(&b);
 		free_mat(&x);
 	}
 
+	pause();
 
 	return 0;
 }
