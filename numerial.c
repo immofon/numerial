@@ -326,7 +326,7 @@ int mat_reduction_qr(mat_t Q,mat_t R,mat_t A) {
 }
 
 
-int mat_back_solution(mat_t A,mat_t x,mat_t b) {
+int mat_back_substitution(mat_t A,mat_t x,mat_t b) {
 	if (x.n != 1 || b.n != 1 ||  A.m != A.n || x.m != b.m) {
 		return 0;
 	}
@@ -368,7 +368,7 @@ int mat_inv_qr(mat_t T,mat_t A,int (*reduction_qr)(mat_t Q,mat_t R,mat_t A)){
 		}
 
 		MUST(mat_product(b,Q,E));
-		MUST(mat_back_solution(R,E,b));
+		MUST(mat_back_substitution(R,E,b));
 
 		range(i,1,A.n,1) {
 			mat_v(T,i,j) = vec_v(E,i);
@@ -453,7 +453,7 @@ int mat_solve_qr(mat_t x,mat_t A,mat_t b, int (*reduction_qr)(mat_t Q,mat_t R,ma
 	MUST((*reduction_qr)(Q,R,A));
 	MUST(mat_transpose(Q,Q));
 	MUST(mat_product(b1,Q,b));
-	MUST(mat_back_solution(R,x,b1));
+	MUST(mat_back_substitution(R,x,b1));
 
 	HANDLE_MUST(ret);
 	free_mat(&Q);

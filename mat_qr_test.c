@@ -41,7 +41,7 @@ int main() {
 	assert(mat_product(c,Q,b));
 	mat_println("",c);
 
-	assert(mat_back_solution(R,b,c));
+	assert(mat_back_substitution(R,b,c));
 	mat_println("",b);
 
 	assert(mat_product(c,A,b));

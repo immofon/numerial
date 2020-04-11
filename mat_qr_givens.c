@@ -45,7 +45,7 @@ int mat_assign(mat_t mat,double* data);
 
 // T can be A.
 int mat_transpose(mat_t T, mat_t A);
-int mat_back_solution(mat_t A,mat_t x,mat_t b);
+int mat_back_substitution(mat_t A,mat_t x,mat_t b);
 int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A);
 int mat_inv_qr_givens(mat_t T,mat_t A);
 
@@ -217,7 +217,7 @@ int mat_transpose(mat_t T, mat_t A) {
 }
 
 
-int mat_back_solution(mat_t A,mat_t x,mat_t b) {
+int mat_back_substitution(mat_t A,mat_t x,mat_t b) {
 	if (x.n != 1 || b.n != 1 ||  A.m != A.n || x.m != b.m) {
 		return 0;
 	}
@@ -314,7 +314,7 @@ int mat_inv_qr_givens(mat_t T,mat_t A) {
 			goto ERROR;
 		}
 
-		if(!mat_back_solution(R,E,b)) {
+		if(!mat_back_substitution(R,E,b)) {
 			goto ERROR;
 		}
 
