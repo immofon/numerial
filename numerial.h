@@ -95,7 +95,6 @@ int mat_back_substitution(mat_t A,mat_t x,mat_t b);
 int mat_reduction_qr(mat_t Q,mat_t R,mat_t A);
 int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A);
 int mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A);
-int mat_reduction_qr_household_opt(mat_t Q,mat_t R,mat_t A);
 
 // T cannot be A.
 int mat_inv_qr(mat_t T,mat_t A,int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));

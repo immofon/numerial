@@ -553,7 +553,7 @@ int _mat_set_household(mat_t H,int k,mat_t A) {
 	return ret;
 }
 
-int mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A) {
+int _mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A) {
 	if(!mat_is_same_size(R,A)) {
 		return 0;
 	}
@@ -587,7 +587,7 @@ int mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A) {
 }
 
 
-int mat_reduction_qr_household_opt(mat_t Q,mat_t R,mat_t A) {
+int mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A) {
 	if(!mat_is_same_size(R,A)) {
 		return 0;
 	}
