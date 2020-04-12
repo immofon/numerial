@@ -585,3 +585,84 @@ int mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A) {
 	free_mat(&Tr);
 	return ret;
 }
+
+
+int mat_reduction_qr_household_opt(mat_t Q,mat_t R,mat_t A) {
+	if(!mat_is_same_size(R,A)) {
+		return 0;
+	}
+	if(Q.m != Q.n || Q.m != A.m) {
+		return 0;
+	}
+
+	int i,j,k,s,q,m,n;
+	mat_t v = new_mat_vec(A.m);
+	double t;
+	double alpha;
+
+	init_mat(Q,i,j,i==j?1:0);
+	MUST(mat_copy(R,A));
+
+	m = R.m;
+	n = R.n;
+	q = m-1 > n ? m-1 : n;
+
+	range(k,1,q,1) {
+		// build v
+		range(i,1,k-1,1) {
+			vec_v(v,i) = 0;
+		}
+		alpha = 0;
+		range(s,k,m,1) {
+			alpha += mat_v(R,s,k)* mat_v(R,s,k);
+		}
+		alpha = sqrt(alpha);
+
+		if(mat_v(R,k,k) < 0) {
+			alpha = -alpha;
+		}
+
+		vec_v(v,k) = (mat_v(R,k,k) + alpha);
+		range(i,k+1,m,1) {
+			vec_v(v,i) = mat_v(R,i,k);
+		}
+
+		t = 0;
+		range(i,k,m,1) {
+			t += vec_v(v,i) * vec_v(v,i);
+		}
+		t = sqrt(t);
+		range(i,k,m,1) {
+			vec_v(v,i) /= t;
+		}
+
+		// update R
+		range(j,1,n,1) {
+			t = 0;
+			range(s,k,m,1) {
+				t += vec_v(v,s) * mat_v(R,s,j);
+			}
+
+			range(i,k,m,1)  {
+				mat_v(R,i,j) -= 2*vec_v(v,i) *t;
+			}
+		}
+
+		// update Q
+		range(i,1,m,1) {
+			t = 0;
+			range(s,k,m,1) {
+				t += mat_v(Q,i,s) * vec_v(v,s);
+			}
+
+			range(j,k,n,1) {
+				mat_v(Q,i,j) -= 2 * vec_v(v,j) * t;
+			}
+		}
+
+	}
+
+	HANDLE_MUST(ret);
+	free_mat(&v);
+	return ret;
+}

@@ -43,7 +43,7 @@ int main() {
 
 	printf("Method 2: Household\n");
 
-	assert(mat_solve_qr(x,H,b,&mat_reduction_qr_household));
+	assert(mat_solve_qr(x,H,b,&mat_reduction_qr_household_opt));
 	printf("x = \n");
 	mat_println("",x);
 
