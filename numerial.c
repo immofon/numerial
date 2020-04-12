@@ -385,16 +385,16 @@ int mat_inv_qr(mat_t T,mat_t A,int (*reduction_qr)(mat_t Q,mat_t R,mat_t A)){
 
 
 int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A) {
-	if(R.m != A.m || R.n != A.n) {
+	if(!mat_is_same_size(R,A)) {
 		return 0;
 	}
-
-	if(R.n != A.m || R.m != R.n) {
+	if(Q.m != Q.n || Q.m != A.m) {
 		return 0;
 	}
 
 	int i,j,k;
 	double xi,xj,c,s,u;
+	int z = 0;
 
 	if(!mat_copy(R,A)) {
 		return 0;
@@ -402,7 +402,9 @@ int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A) {
 
 	init_mat(Q,i,j,i==j?1:0);
 
-	range(k,1,A.n,1) range(i,k+1,A.m,1) {
+
+	z = A.m - 1 < A.n ? A.m - 1 : A.n;
+	range(k,1,z,1) range(i,k+1,A.m,1) {
 		xi = mat_v(R,k,k);
 		xj = mat_v(R,i,k);
 		u = sqrt(xi*xi + xj*xj);
@@ -411,12 +413,14 @@ int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A) {
 			c = xi/u;
 			s = xj/u;
 
-			range(j,1,A.n,1) {
+			range(j,1,R.n,1) {
 				xi = mat_v(R,k,j);
 				xj = mat_v(R,i,j);
 				mat_v(R,k,j) = c*xi + s*xj;
 				mat_v(R,i,j) = c*xj - s*xi;
 
+			}
+			range(j,1,Q.n,1) {
 				xi = mat_v(Q,k,j);
 				xj = mat_v(Q,i,j);
 				mat_v(Q,k,j) = c*xi + s*xj;
