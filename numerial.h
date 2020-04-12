@@ -21,9 +21,7 @@ void pause();
 #define MUST_return_error() goto ERROR
 #define MUST(exp) if(!(exp)) {MUST_return_error();}
 
-
 #define new(type,size) ((type *) malloc(sizeof(type)*(size)))
-
 
 // i: int, after each{}, i should equal to n
 // n: int, MUST greater than 0.
@@ -110,6 +108,5 @@ double poly_value(double a[],int n, double x);
 
 // MUST free after use its return.
 double* exp_taylor(int n);
-
 
 double vec_dot_product(double a[], double b[], int dim);
