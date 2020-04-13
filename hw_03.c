@@ -47,6 +47,7 @@ int main() {
 	printf("x = \n");
 	mat_println("",x);
 
+	pause();
 	return 0;
 }
 
