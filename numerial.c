@@ -669,3 +669,50 @@ int mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A) {
 	free_mat(&v);
 	return ret;
 }
+
+double mat_cond_1(mat_t A) {
+	double cond = 0;
+	double t;
+	int i,j;
+
+	range(j,1,A.n,1) {
+		t =0;
+		range(i,1,A.m,1) {
+			t += fabs(mat_v(A,i,j));
+		}
+
+		if (t > cond) {
+			cond = t;
+		}
+	}
+
+	return cond;
+}
+double mat_cond_inf(mat_t A) {
+	double cond = 0;
+	double t;
+	int i,j;
+
+	range(i,1,A.m,1) {
+		t =0;
+		range(j,1,A.n,1) {
+			t += fabs(mat_v(A,i,j));
+		}
+
+		if (t > cond) {
+			cond = t;
+		}
+	}
+
+	return cond;
+}
+double mat_cond_F(mat_t A) {
+	double cond;
+	int i,j;
+
+	mat_each(A,i,j) {
+		cond += mat_v(A,i,j)* mat_v(A,i,j);
+	}
+
+	return sqrt(cond);
+}

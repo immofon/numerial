@@ -101,6 +101,10 @@ int mat_inv_qr(mat_t T,mat_t A,int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));
 
 int mat_solve_qr(mat_t x,mat_t A,mat_t b, int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));
 
+double mat_cond_1(mat_t A);
+double mat_cond_F(mat_t A);
+double mat_cond_inf(mat_t A);
+
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
 // len(P) = n+1
 // n: degree of polynomial
