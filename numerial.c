@@ -670,8 +670,8 @@ int mat_reduction_qr_household(mat_t Q,mat_t R,mat_t A) {
 	return ret;
 }
 
-double mat_cond_1(mat_t A) {
-	double cond = 0;
+double mat_norm_1(mat_t A) {
+	double norm = 0;
 	double t;
 	int i,j;
 
@@ -681,15 +681,15 @@ double mat_cond_1(mat_t A) {
 			t += fabs(mat_v(A,i,j));
 		}
 
-		if (t > cond) {
-			cond = t;
+		if (t > norm) {
+			norm = t;
 		}
 	}
 
-	return cond;
+	return norm;
 }
-double mat_cond_inf(mat_t A) {
-	double cond = 0;
+double mat_norm_inf(mat_t A) {
+	double norm = 0;
 	double t;
 	int i,j;
 
@@ -699,20 +699,63 @@ double mat_cond_inf(mat_t A) {
 			t += fabs(mat_v(A,i,j));
 		}
 
-		if (t > cond) {
-			cond = t;
+		if (t > norm) {
+			norm = t;
 		}
 	}
 
-	return cond;
+	return norm;
 }
-double mat_cond_F(mat_t A) {
-	double cond;
+double mat_norm_F(mat_t A) {
+	double norm;
 	int i,j;
 
 	mat_each(A,i,j) {
-		cond += mat_v(A,i,j)* mat_v(A,i,j);
+		norm += mat_v(A,i,j)* mat_v(A,i,j);
 	}
 
-	return sqrt(cond);
+	return sqrt(norm);
 }
+
+int mat_cond(double *cond,mat_t A,double (*mat_norm)(mat_t A)) {
+	mat_t invA = new_mat(A.m,A.n);
+	MUST(mat_inv_qr(invA,A,&mat_reduction_qr));
+	*cond = (*mat_norm)(A) * (*mat_norm)(invA);
+	MUST_return_ok();
+
+	HANDLE_MUST(ret);
+	free_mat(&invA);
+	return ret;
+}
+
+double vec_norm_1(mat_t A) {
+	int i;
+	double norm = 0;
+	range(i,1,A.m,1) {
+		norm += fabs(mat_v(A,i,1));
+	}
+	return norm;
+}
+double vec_norm_2(mat_t A){
+	int i;
+	double norm = 0;
+	range(i,1,A.m,1) {
+		norm += mat_v(A,i,1)*mat_v(A,i,1);
+	}
+	return sqrt(norm);
+};
+double vec_norm_inf(mat_t x){
+	int i;
+	double norm = 0;
+	double t;
+	range(i,1,x.m,1) {
+		t = fabs(mat_v(x,i,1));
+		if (t > norm) {
+			norm = t;
+		}
+	}
+
+	return norm;
+};
+
+

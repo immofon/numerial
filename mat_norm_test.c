@@ -16,13 +16,13 @@ int main() {
 	printf("inverse of A=\n");
 	mat_println("",Ainv);
 
-	printf("cond_1 %lf\n",mat_cond_1(A));
-	printf("cond_inf %lf\n",mat_cond_inf(A));
-	printf("cond_F %lf\n",mat_cond_F(A));
+	printf("norm_1 %lf\n",mat_norm_1(A));
+	printf("norm_inf %lf\n",mat_norm_inf(A));
+	printf("norm_F %lf\n",mat_norm_F(A));
 
 
-	printf("cond_1 %lf\n",mat_cond_1(Ainv));
-	printf("cond_inf %lf\n",mat_cond_inf(Ainv));
-	printf("cond_F %lf\n",mat_cond_F(Ainv));
+	printf("norm_1 %lf\n",mat_norm_1(Ainv));
+	printf("norm_inf %lf\n",mat_norm_inf(Ainv));
+	printf("norm_F %lf\n",mat_norm_F(Ainv));
 	return 0;
 }
