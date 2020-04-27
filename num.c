@@ -82,15 +82,38 @@ static int l_mat_println(lua_State *L) {
 	return 0;
 }
 
+static int l_mat_qr(lua_State *L,int (*reduction_qr)(mat_t Q,mat_t R,mat_t A)) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	mat_t *Q = (mat_t *) l_new_mat(L,A->m,A->m);
+	mat_t *R = (mat_t *) l_new_mat(L,A->m,A->n);
+	if((reduction_qr)(*Q,*R,*A)) {
+		return 2;
+	}
+	luaL_error(L,"l_mat_qr");
+	return 0;
+}
+
+static int l_mat_qr_givens(lua_State *L) {
+	return l_mat_qr(L,&mat_reduction_qr_givens);
+}
+
+static int l_mat_qr_household(lua_State *L) {
+	return l_mat_qr(L,&mat_reduction_qr_household);
+}
+
 static const struct luaL_Reg numlib[] = {
 	{"new",l_mat},
 	{"println",l_mat_println},
 	{"assign",l_mat_assign},
+	{"qr",l_mat_qr_givens},
+	{"qr_givens",l_mat_qr_givens},
+	{"qr_household",l_mat_qr_household},
 	{NULL,NULL},
 };
 
 static const struct luaL_Reg mat_metareg[] ={
 	{"__add",l_mat_add},
+	{"__shl",l_mat_assign},
 	{NULL,NULL},
 };
 
