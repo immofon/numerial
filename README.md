@@ -117,17 +117,29 @@ R=
 ```
 
 # The principle of return value
-All function in this libary that return `int` which considered as error code by defauft. 
+All function in this libary that return `int` which should be considered as error code by defauft.
 
 For example,
 ```c
-	int mat_det_lu(double *det, ...);
+int mat_det_lu(double *det, ...);
 ```
 We use `*det` to return value that we actually require and use `int` to represent that it is fine or not.
 
+If you want to use this kind function in `main`, I suggest to use
+```c
+	// some stuff
+
+	int  main() {
+		// some stuff
+		assert(mat_det_lu(&det,...));
+		// some stuff
+		return 0;
+	}
+```c
+
 Another example,
 ```c
-	int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A);
+int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A);
 ```
 This function will get the QR reduction of A and store the result to Q and R. All output values are put on the left side, follow the left value.
 
@@ -135,22 +147,22 @@ This function will get the QR reduction of A and store the result to Q and R. Al
 ## mat_v(A,i,j)
 Get the value of the (i,j) element of matrix A. By the reason that it is implemented by macro, it is fine to use it as left value.
 ```c
-	mat_v(A,2,3) = 5; // set (2,3) element of matrix A to 3.
+mat_v(A,2,3) = 5; // set (2,3) element of matrix A to 3.
 ```
 
 ## range(i,from,to,delta)
 It is a macro for simplifying `for` loop.
 ```c
-	int i;
-	range(i,1,n,2) {
-		// do something use i.
-	}
+int i;
+range(i,1,n,2) {
+	// do something use i.
+}
 ```
-is equivalent to 
+is equivalent to
 
 ```c
-	int i;
-	for(i = 1; i <= n; i += 2) {
-		// do something use i.
-	}
+int i;
+for(i = 1; i <= n; i += 2) {
+	// do something use i.
+}
 ```
