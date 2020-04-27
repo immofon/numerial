@@ -135,7 +135,7 @@ If you want to use this kind function in `main`, I suggest to use
 		// some stuff
 		return 0;
 	}
-```c
+```
 
 Another example,
 ```c
