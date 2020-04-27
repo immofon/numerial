@@ -38,12 +38,12 @@ typedef struct{
 
 // m*n matrix, use it to read and write.
 // i,j are both one-based.
-#define mat_v(mat,i,j) (mat.data[(((i)-1)*(mat.n)+((j)-1))])
+#define mat_v(mat,i,j) ((mat).data[(((i)-1)*((mat).n)+((j)-1))])
 
 #define mat_each(mat,i,j) range(i,1,(mat).m,1) range(j,1,(mat).n,1)
 
-#define init_mat(mat,i,j,exp) mat_each(mat,i,j) { \
-	mat_v(mat,i,j) = (exp); \
+#define init_mat(mat,i,j,exp) mat_each((mat),i,j) { \
+	mat_v((mat),i,j) = (exp); \
 }
 
 
