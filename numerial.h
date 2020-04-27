@@ -101,6 +101,11 @@ int mat_inv_qr(mat_t T,mat_t A,int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));
 
 int mat_solve_qr(mat_t x,mat_t A,mat_t b, int (*reduction_qr)(mat_t Q,mat_t R,mat_t A));
 
+
+int mat_reduction_lu_doolittle(mat_t L,mat_t U,mat_t A);
+int mat_reduction_lu_crout(mat_t L,mat_t U,mat_t A);
+int mat_det_lu(double *det,mat_t A,int (*mat_reduction_lu)(mat_t L,mat_t U,mat_t A));
+
 double mat_norm_1(mat_t A);
 double mat_norm_F(mat_t A);
 double mat_norm_inf(mat_t A);

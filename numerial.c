@@ -758,4 +758,120 @@ double vec_norm_inf(mat_t x){
 	return norm;
 };
 
+int mat_reduction_lu_doolittle(mat_t L,mat_t U,mat_t A) {
+	MUST(A.m == A.n);
+	MUST(mat_is_same_size_3(L,U,A));
+
+	int i,j,k,n;
+	n = A.m;
+
+	init_mat(L,i,j,i==j? 1 : 0);
+	init_mat(U,i,j,0);
+
+	range(k,1,n,1) {
+		mat_v(U,1,k) = mat_v(A,1,k);
+	}
+
+	MUST(mat_v(U,1,1) != 0);
+
+	range(k,1,n,1) {
+		mat_v(L,k,1) = mat_v(A,k,1) / mat_v(U,1,1);
+	}
+
+	double sum;
+	range(i,2,n,1) {
+		range(k,i,n,1) {
+			sum = mat_v(A,i,k);
+			range(j,1,i-1,1) {
+				sum -= mat_v(L,i,j) * mat_v(U,j,k);
+			}
+			mat_v(U,i,k) = sum;
+		}
+
+		MUST(mat_v(U,i,i)!=0);
+
+		range(k,i+1,n,1) {
+			sum = mat_v(A,k,i);
+			range(j,1,i-1,1) {
+				sum -= mat_v(L,k,j) * mat_v(U,j,i);
+			}
+			sum /= mat_v(U,i,i);
+			mat_v(L,k,i) = sum;
+		}
+	}
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+int mat_reduction_lu_crout(mat_t L,mat_t U,mat_t A) {
+	MUST(A.m == A.n);
+	MUST(mat_is_same_size_3(L,U,A));
+
+	int i,j,k,n;
+	n = A.m;
+
+	init_mat(L,i,j,0);
+	init_mat(U,i,j,i==j? 1 : 0);
+
+	range(k,1,n,1) {
+		mat_v(L,k,1) = mat_v(A,k,1);
+	}
+
+	MUST(mat_v(L,1,1) != 0);
+	range(k,1,n,1) {
+		mat_v(U,1,k) = mat_v(A,1,k) / mat_v(L,1,1);
+	}
+
+	double sum;
+	range(i,2,n,1) {
+		range(k,i,n,1) {
+			sum = mat_v(A,k,i);
+			range(j,1,i-1,1) {
+				sum -= mat_v(L,k,j) * mat_v(U,j,i);
+			}
+			mat_v(L,k,i) = sum;
+		}
+
+		MUST(mat_v(L,i,i) != 0);
+
+		range(k,i+1,n,1) {
+			sum = mat_v(A,i,k);
+			range(j,1,i-1,1) {
+				sum -= mat_v(L,i,j) * mat_v(U,j,k);
+			}
+			sum /= mat_v(L,i,i);
+			mat_v(U,i,k) = sum;
+		}
+	}
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+
+
+int mat_det_lu(double *det,mat_t A,int (*mat_reduction_lu)(mat_t L,mat_t U,mat_t A)) {
+	mat_t L = new_mat(A.m,A.n);
+	mat_t U = new_mat(A.m,A.n);
+
+	MUST(A.m == A.n);
+	MUST((*mat_reduction_lu)(L,U,A));
+	double t = 1;
+	int i;
+
+	range(i,1,L.m,1) {
+		t *= mat_v(L,i,i);
+	}
+
+	range(i,1,U.m,1) {
+		t *= mat_v(U,i,i);
+	}
+
+	*det = t;
+
+	HANDLE_MUST(ret);
+	free_mat(&L);
+	free_mat(&U);
+	return ret;
+}
+
 
