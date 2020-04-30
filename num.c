@@ -1,3 +1,4 @@
+#include <time.h>
 #include <lua.h>
 #include <lauxlib.h>
 #include "numerial.h"
@@ -39,6 +40,29 @@ static int l_mat(lua_State *L) {
 	mat_t* A = l_new_mat(L,m,n);
 
 	return 1;
+}
+
+static int l_mat_get(lua_State *L) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	int i = (int)luaL_checkinteger(L,2);
+	int j = (int)luaL_checkinteger(L,3);
+	luaL_argcheck(L,1<=i && i <= A->m ,2, "out of range");
+	luaL_argcheck(L,1<=j && j <= A->n ,3, "out of range");
+
+	lua_pushnumber(L,mat_v(*A,i,j));
+	return 1;
+}
+
+static int l_mat_set(lua_State *L) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	int i = (int)luaL_checkinteger(L,2);
+	int j = (int)luaL_checkinteger(L,3);
+	double v = (double)luaL_checknumber(L,4);
+	luaL_argcheck(L,1<=i && i <= A->m ,2, "out of range");
+	luaL_argcheck(L,1<=j && j <= A->n ,3, "out of range");
+
+	mat_v(*A,i,j) = v;
+	return 0;
 }
 
 //mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
@@ -97,7 +121,7 @@ static int l_mat_assign(lua_State *L) {
 	int i,j;
 	double v;
 	mat_each(*A,i,j) {
-		if (lua_geti(L,2,(i-1)*A->m + j) == LUA_TNUMBER) {
+		if (lua_geti(L,2,(i-1)*(A->n) + j) == LUA_TNUMBER) {
 			v = (double)lua_tonumber(L,-1);
 			lua_pop(L,1);
 			mat_v(*A,i,j) = v;
@@ -106,7 +130,8 @@ static int l_mat_assign(lua_State *L) {
 		}
 	}
 
-	return 0;
+	lua_pushvalue(L,1);
+	return 1;
 }
 
 static int l_mat_println(lua_State *L) {
@@ -159,12 +184,26 @@ static int l_mat_equal(lua_State *L) {
 	return 1;
 }
 
+static int l_test_timer(lua_State *L) {
+	luaL_argcheck(L,lua_isfunction(L,1),1,"expect function");
+	clock_t t;
+	t = clock();
+	lua_call(L,0,0);
+	lua_pushnumber(L,(((double)(clock() - t)*1000)/CLOCKS_PER_SEC));
+	return 1;
+}
+
 static const struct luaL_Reg numlib[] = {
 	{"new",l_mat},
+	{"get",l_mat_get},
+	{"set",l_mat_set},
+	{"println",l_mat_println},
 	{NULL,NULL},
 };
 
 static const struct luaL_Reg mat_metareg[] ={
+	{"get",l_mat_get},
+	{"set",l_mat_set},
 	{"println",l_mat_println},
 	{"assign",l_mat_assign},
 	{"qr",l_mat_qr_givens},
@@ -178,11 +217,18 @@ static const struct luaL_Reg mat_metareg[] ={
 	{NULL,NULL},
 };
 
+
+static const struct luaL_Reg testlib[] ={
+	{"timer",l_test_timer},
+	{NULL,NULL},
+};
 int luaopen_num(lua_State *L) {
 	luaL_newmetatable(L, MAT_T);
 	luaL_setfuncs(L,mat_metareg,0);
 	lua_newtable(L);
 	luaL_newlib(L,numlib);
 	lua_setfield(L,-2,"mat");
+	luaL_newlib(L,testlib);
+	lua_setfield(L,-2,"test");
 	return 1;
 }

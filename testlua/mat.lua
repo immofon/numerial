@@ -1,41 +1,32 @@
 local num = require("num")
 local mat = num.mat
 
-local A = mat.new(3,4)
---[[
-A:assign {
-1,2,3,4,
-2,3,4,5,
-3,4,5,6,
-}
---]]
-
-A:println ""
-A = A+A
-
-A:println ""
-
-local n = 3
-local B = mat.new(n,n)
-
-B:assign {
-	0,0,1,
-	0,0,0,
-	1,0,1,
+local Iexpect = mat.new(4,4):assign {
+	1,0,0,0,
+	0,1,0,0,
+	0,0,1,0,
+	0,0,0,1,
 }
 
-B:println ".0"
+local I = mat.new(4,4)
+for i=1,4 do
+	I:set(i,i,1)
+end
 
-local Q,R = B:qr_household()
-Q:println "4.1"
-R:println "4.1"
+assert(I == Iexpect)
 
-local C = mat.new(4,4)
-C:assign {
-	1,2,3,4,
-	9,8,7,6,
-	4,5,6,7,
-	8,4,2,1,
-}
-Q,R = C:qr_household()
-assert(C == Q*R,"qr")
+function mat.new_ident(n)
+	local I = mat.new(n,n)
+	for i=1,n do
+		I:set(i,i,1)
+	end
+	return I
+end
+
+mat.new_ident(10):println ".0"
+
+mat.new(3,3):assign {
+	1,2,3,
+	1,2,3,
+	2,3,4,
+} :println ".0"
