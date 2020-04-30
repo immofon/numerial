@@ -189,7 +189,7 @@ static int l_test_timer(lua_State *L) {
 	clock_t t;
 	t = clock();
 	lua_call(L,0,0);
-	lua_pushnumber(L,(((double)(clock() - t)*1000)/CLOCKS_PER_SEC));
+	lua_pushnumber(L,(((double)(clock() - t))/CLOCKS_PER_SEC));
 	return 1;
 }
 
