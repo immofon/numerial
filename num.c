@@ -15,7 +15,13 @@ static mat_t* l_new_mat(lua_State *L,int m,int n) {
 	A->m = m;
 	A->n = n;
 	A->data = (double *)(A+1);
+	int i;
+	range(i,0,m*n-1,1) {
+		A->data[i] = 0;
+	}
 	luaL_getmetatable(L,MAT_T);
+	lua_pushvalue(L,-1);
+	lua_setfield(L,-2,"__index");
 	lua_setmetatable(L,-2);
 	return A;
 }
@@ -48,6 +54,35 @@ static int l_mat_add(lua_State *L) {
 	}
 
 	luaL_error(L,"numerial: mat_add");
+	return 0;
+}
+
+static int l_mat_sub(lua_State *L) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	mat_t *B = (mat_t *) luaL_checkudata(L,2,MAT_T);
+	luaL_argcheck(L,A->m == B->m,2,"not same size");
+	luaL_argcheck(L,A->n == B->n,2,"not same size");
+
+	mat_t *R = l_new_mat(L,A->m,A->n);
+	if (mat_sub(*R,*A,*B)) {
+		return 1;
+	}
+
+	luaL_error(L,"numerial: mat_sub");
+	return 0;
+}
+
+static int l_mat_mul(lua_State *L) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	mat_t *B = (mat_t *) luaL_checkudata(L,2,MAT_T);
+	luaL_argcheck(L,A->n == B->m,2,"can't product");
+
+	mat_t *R = l_new_mat(L,A->m,B->n);
+	if (mat_product(*R,*A,*B)) {
+		return 1;
+	}
+
+	luaL_error(L,"numerial: mat_product");
 	return 0;
 }
 
@@ -101,19 +136,45 @@ static int l_mat_qr_household(lua_State *L) {
 	return l_mat_qr(L,&mat_reduction_qr_household);
 }
 
+#define DOUBLE_EQUAL_DELTA 1e-10
+static int l_mat_equal(lua_State *L) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	mat_t *B = (mat_t *) luaL_checkudata(L,2,MAT_T);
+	if (A->m != B->m || A->n != B->n) {
+		lua_pushboolean(L,1);
+		return 1;
+	}
+
+	double delta;
+	int i,j;
+	mat_each(*A,i,j) {
+		delta = fabs(mat_v(*A,i,j) - mat_v(*B,i,j));
+		if ((!(delta == delta)) || delta > DOUBLE_EQUAL_DELTA) {
+			lua_pushboolean(L,0);
+			return 1;
+		}
+	}
+
+	lua_pushboolean(L,1);
+	return 1;
+}
+
 static const struct luaL_Reg numlib[] = {
 	{"new",l_mat},
+	{NULL,NULL},
+};
+
+static const struct luaL_Reg mat_metareg[] ={
 	{"println",l_mat_println},
 	{"assign",l_mat_assign},
 	{"qr",l_mat_qr_givens},
 	{"qr_givens",l_mat_qr_givens},
 	{"qr_household",l_mat_qr_household},
-	{NULL,NULL},
-};
-
-static const struct luaL_Reg mat_metareg[] ={
 	{"__add",l_mat_add},
+	{"__sub",l_mat_sub},
 	{"__shl",l_mat_assign},
+	{"__eq",l_mat_equal},
+	{"__mul",l_mat_mul},
 	{NULL,NULL},
 };
 

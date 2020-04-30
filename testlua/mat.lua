@@ -2,22 +2,40 @@ local num = require("num")
 local mat = num.mat
 
 local A = mat.new(3,4)
+--[[
+A:assign {
+1,2,3,4,
+2,3,4,5,
+3,4,5,6,
+}
+--]]
 
+A:println ""
 A = A+A
 
-mat.println(A,".0")
+A:println ""
 
 local n = 3
 local B = mat.new(n,n)
 
-mat.assign(B,{
+B:assign {
 	0,0,1,
 	0,0,0,
 	1,0,1,
-})
+}
 
-mat.println(B,".0")
+B:println ".0"
 
-local Q,R = mat.qr_givens(B)
-mat.println(Q,"4.1")
-mat.println(R,"4.1")
+local Q,R = B:qr_household()
+Q:println "4.1"
+R:println "4.1"
+
+local C = mat.new(4,4)
+C:assign {
+	1,2,3,4,
+	9,8,7,6,
+	4,5,6,7,
+	8,4,2,1,
+}
+Q,R = C:qr_household()
+assert(C == Q*R,"qr")
