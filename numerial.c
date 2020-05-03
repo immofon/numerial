@@ -973,8 +973,6 @@ int mat_reduction_plu_doolittle(mat_t P,mat_t L,mat_t U,mat_t A) {
 	range(k,1,n-1,1) {
 		MUST(_mat_choose_main_element(&r,U,k));
 		MUST(mat_swap_row(U,k,r));
-		printf("main element: (%d,%d)\n",r,k);
-		mat_println("",U);
 		MUST(mat_swap_row(P,k,r));
 
 		range(i,k+1,n,1) {

@@ -180,7 +180,6 @@ static int l_mat_solve_L(lua_State *L) {
 	luaL_argcheck(L,L1->m==L1->n,1,"expect square matrix");
 	mat_t *b = (mat_t *) luaL_checkudata(L,2,MAT_T);
 	luaL_argcheck(L,L1->n==b->m,2,"worry size");
-	printf("size: (%d,%d)\n",b->m,b->n);
 	luaL_argcheck(L,b->n==1,2,"expect vector");
 
 

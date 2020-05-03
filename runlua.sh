@@ -1,4 +1,5 @@
 #!/bin/bash
 
 ./compile_lua_module.sh
-lua $1
+cd testlua
+lua *.lua

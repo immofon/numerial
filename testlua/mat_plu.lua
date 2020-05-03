@@ -30,8 +30,11 @@ for i=1,3 do
 	B:set(i,3,e3:get(i,1))
 end
 
-B:println ""
-A:println ""
+local I = mat.new(3,3)
+for i=1,3 do
+	I:set(i,i,1)
+end
 
-mat.println(A*B,"")
+assert(A*B == I)
+assert(B*A == I)
 
