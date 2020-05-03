@@ -349,6 +349,33 @@ int mat_back_substitution(mat_t A,mat_t x,mat_t b) {
 	return 1;
 }
 
+int mat_back_substitution_L(mat_t x,mat_t L,mat_t b) {
+	MUST(mat_is_same_size(x,b));
+	MUST(L.m == L.n);
+	MUST(L.n = x.m);
+
+	int j,k;
+	double tmp;
+	int n = L.m;
+
+	range(k,1,n,1) {
+		tmp = vec_v(b,k);
+		range(j,1,k-1,1) {
+			tmp -= mat_v(L,k,j) * vec_v(x,j);
+		}
+		MUST(mat_v(L,k,k) != 0);
+		tmp /= mat_v(L,k,k);
+
+		vec_v(x,k) = tmp;
+	}
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+int mat_back_substitution_U(mat_t x,mat_t U,mat_t b) {
+	return mat_back_substitution(U,x,b);
+}
+
 // T cannot be A.
 int mat_inv_qr(mat_t T,mat_t A,int (*reduction_qr)(mat_t Q,mat_t R,mat_t A)){
 	if (A.m != A.n || T.m != T.n || A.m != T.m) {
@@ -874,4 +901,96 @@ int mat_det_lu(double *det,mat_t A,int (*mat_reduction_lu)(mat_t L,mat_t U,mat_t
 	return ret;
 }
 
+// TODO test
+int mat_swap_row(mat_t A,int i,int j) {
+	MUST(1 <= i && i <= A.m);
+	MUST(1 <= j && j <= A.m);
 
+	int k;
+	double tmp;
+	range(k,1,A.n,1) {
+		tmp = mat_v(A,i,k);
+		mat_v(A,i,k) = mat_v(A,j,k);
+		mat_v(A,j,k) = tmp;
+	}
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+
+// TODO test
+int mat_swap_column(mat_t A,int i,int j) {
+	MUST(1 <= i && i <= A.n);
+	MUST(1 <= j && j <= A.n);
+
+	int k;
+	double tmp;
+	range(k,1,A.m,1) {
+		tmp = mat_v(A,i,k);
+		mat_v(A,i,k) = mat_v(A,j,k);
+		mat_v(A,j,k) = tmp;
+	}
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+
+int _mat_choose_main_element(int *melem,mat_t A,int n) {
+	MUST(1 <= n && n <= A.m);
+	MUST(1 <= n && n <= A.n);
+
+	double max_v = fabs(mat_v(A,n,n));
+	int max_n = n;
+	int k;
+	range(k,n+1,A.m,1) {
+		if (fabs(mat_v(A,k,n)) > max_v) {
+			max_v = fabs(mat_v(A,k,n));
+			max_n = k;
+		}
+	}
+
+	*melem = max_n;
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+
+
+int mat_reduction_plu_doolittle(mat_t P,mat_t L,mat_t U,mat_t A) {
+	MUST(A.m == A.n);
+	MUST(mat_is_same_size_3(L,U,A));
+	MUST(mat_is_same_size(P,L));
+
+	int i,j,k,n;
+	n = A.m;
+
+	init_mat(P,i,j,i==j? 1 : 0);
+	MUST(mat_copy(U,A));
+	init_mat(L,i,j,i==j? 1 : 0);
+
+
+	int r;
+	range(k,1,n-1,1) {
+		MUST(_mat_choose_main_element(&r,U,k));
+		MUST(mat_swap_row(U,k,r));
+		printf("main element: (%d,%d)\n",r,k);
+		mat_println("",U);
+		MUST(mat_swap_row(P,k,r));
+
+		range(i,k+1,n,1) {
+			mat_v(U,i,k) /= mat_v(U,k,k);
+
+			range(j,k+1,n,1) {
+				mat_v(U,i,j) -= mat_v(U,i,k) * mat_v(U,k,j);
+			}
+		}
+	}
+
+	range(j,1,n-1,1) range(i,j+1,n,1) {
+		mat_v(L,i,j) = mat_v(U,i,j);
+		mat_v(U,i,j) = 0;
+	}
+
+	HANDLE_MUST(ret);
+	return ret;
+}

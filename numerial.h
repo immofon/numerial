@@ -91,6 +91,8 @@ int mat_is_same_size(mat_t A,mat_t B) ;
 int mat_is_same_size_3(mat_t A,mat_t B,mat_t C) ;
 
 int mat_back_substitution(mat_t A,mat_t x,mat_t b);
+int mat_back_substitution_L(mat_t x,mat_t L,mat_t b);
+int mat_back_substitution_U(mat_t x,mat_t U,mat_t b);
 
 int mat_reduction_qr(mat_t Q,mat_t R,mat_t A);
 int mat_reduction_qr_givens(mat_t Q,mat_t R,mat_t A);
@@ -105,6 +107,8 @@ int mat_solve_qr(mat_t x,mat_t A,mat_t b, int (*reduction_qr)(mat_t Q,mat_t R,ma
 int mat_reduction_lu_doolittle(mat_t L,mat_t U,mat_t A);
 int mat_reduction_lu_crout(mat_t L,mat_t U,mat_t A);
 int mat_det_lu(double *det,mat_t A,int (*mat_reduction_lu)(mat_t L,mat_t U,mat_t A));
+
+int mat_reduction_plu_doolittle(mat_t P,mat_t L,mat_t U,mat_t A);
 
 double mat_norm_1(mat_t A);
 double mat_norm_F(mat_t A);

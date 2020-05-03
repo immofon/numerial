@@ -161,6 +161,55 @@ static int l_mat_qr_household(lua_State *L) {
 	return l_mat_qr(L,&mat_reduction_qr_household);
 }
 
+static int l_mat_plu_doolittle(lua_State *L) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	luaL_argcheck(L,A->m==A->n,1,"expect square matrix");
+
+	mat_t *P = (mat_t *) l_new_mat(L,A->m,A->m);
+	mat_t *L1 = (mat_t *) l_new_mat(L,A->m,A->m);
+	mat_t *U = (mat_t *) l_new_mat(L,A->m,A->m);
+	if (mat_reduction_plu_doolittle(*P,*L1,*U,*A)) {
+		return 3;
+	}
+	luaL_error(L,"mat_reduction_plu_doolittle");
+	return 0;
+}
+
+static int l_mat_solve_L(lua_State *L) {
+	mat_t *L1 = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	luaL_argcheck(L,L1->m==L1->n,1,"expect square matrix");
+	mat_t *b = (mat_t *) luaL_checkudata(L,2,MAT_T);
+	luaL_argcheck(L,L1->n==b->m,2,"worry size");
+	printf("size: (%d,%d)\n",b->m,b->n);
+	luaL_argcheck(L,b->n==1,2,"expect vector");
+
+
+	mat_t *x = (mat_t *) l_new_mat(L,b->m,b->n);
+	if(mat_back_substitution_L(*x,*L1,*b)) {
+		return 1;
+	}
+
+	luaL_error(L,"mat_back_substitution_L");
+	return 0;
+}
+
+static int l_mat_solve_U(lua_State *L) {
+	mat_t *U= (mat_t *) luaL_checkudata(L,1,MAT_T);
+	luaL_argcheck(L,U->m==U->n,1,"expect square matrix");
+	mat_t *b = (mat_t *) luaL_checkudata(L,2,MAT_T);
+	luaL_argcheck(L,U->n==b->m,2,"worry size");
+	luaL_argcheck(L,b->n==1,2,"expect vector");
+
+
+	mat_t *x = (mat_t *) l_new_mat(L,b->m,b->n);
+	if(mat_back_substitution_U(*x,*U,*b)) {
+		return 1;
+	}
+
+	luaL_error(L,"mat_back_substitution_U");
+	return 0;
+}
+
 #define DOUBLE_EQUAL_DELTA 1e-10
 static int l_mat_equal(lua_State *L) {
 	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
@@ -209,6 +258,10 @@ static const struct luaL_Reg mat_metareg[] ={
 	{"qr",l_mat_qr_givens},
 	{"qr_givens",l_mat_qr_givens},
 	{"qr_household",l_mat_qr_household},
+	{"plu",l_mat_plu_doolittle},
+	{"plu_doolittle",l_mat_plu_doolittle},
+	{"solve_L",l_mat_solve_L},
+	{"solve_U",l_mat_solve_U},
 	{"__add",l_mat_add},
 	{"__sub",l_mat_sub},
 	{"__shl",l_mat_assign},
