@@ -2,4 +2,5 @@
 
 ./compile_lua_module.sh
 cd testlua
-lua *.lua
+lua mat_plu.lua
+lua mat_cholesky.lua

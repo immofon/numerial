@@ -175,6 +175,22 @@ static int l_mat_plu_doolittle(lua_State *L) {
 	return 0;
 }
 
+static int l_mat_llt_cholesky(lua_State *L) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	luaL_argcheck(L,A->m==A->n,1,"expect square matrix");
+
+	mat_t *L1 = (mat_t *) l_new_mat(L,A->m,A->m);
+	mat_t *L1t = (mat_t *) l_new_mat(L,A->m,A->m);
+	if (mat_reduction_llt_cholesky(*L1,*A)) {
+		if (mat_transpose(*L1t,*L1)) {
+			return 2;
+		}
+		luaL_error(L,"mat_transpose");
+	}
+	luaL_error(L,"mat_reduction_llt_cholesky");
+	return 0;
+}
+
 static int l_mat_solve_L(lua_State *L) {
 	mat_t *L1 = (mat_t *) luaL_checkudata(L,1,MAT_T);
 	luaL_argcheck(L,L1->m==L1->n,1,"expect square matrix");
@@ -259,6 +275,7 @@ static const struct luaL_Reg mat_metareg[] ={
 	{"qr_household",l_mat_qr_household},
 	{"plu",l_mat_plu_doolittle},
 	{"plu_doolittle",l_mat_plu_doolittle},
+	{"llt_cholesky",l_mat_llt_cholesky},
 	{"solve_L",l_mat_solve_L},
 	{"solve_U",l_mat_solve_U},
 	{"__add",l_mat_add},

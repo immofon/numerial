@@ -992,3 +992,37 @@ int mat_reduction_plu_doolittle(mat_t P,mat_t L,mat_t U,mat_t A) {
 	HANDLE_MUST(ret);
 	return ret;
 }
+
+
+int mat_reduction_llt_cholesky(mat_t L,mat_t A) {
+	MUST(A.m == A.n);
+	MUST(mat_is_same_size(L,A));
+
+	int i,j,k;
+	double sum;
+	int n = A.m;
+
+	init_mat(L,i,j,0);
+
+	range(j,1,n,1) {
+		sum = mat_v(A,j,j);
+		range(k,1,j-1,1) {
+			sum -= mat_v(L,j,k) * mat_v(L,j,k);
+		}
+		sum = sqrt(sum);
+		mat_v(L,j,j) = sum;
+		MUST(sum != 0);
+
+		range(i,j+1,n,1) {
+			sum = mat_v(A,i,j);
+			range(k,1,j-1,1) {
+				sum -= mat_v(L,i,k) * mat_v(L,j,k);
+			}
+
+			mat_v(L,i,j) = sum / mat_v(L,j,j);
+		}
+	}
+
+	HANDLE_MUST(ret);
+	return ret;
+}
