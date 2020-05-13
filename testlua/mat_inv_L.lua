@@ -15,3 +15,9 @@ end
 
 assert(invA * A == I)
 assert(A * invA == I)
+
+local B = A:transpose()
+local invB = B:transpose():inv_L():transpose()
+
+assert(invB * B == I)
+assert(B * invB == I)

@@ -116,6 +116,9 @@ int mat_reduction_llt_cholesky(mat_t L,mat_t A);
 
 int mat_inv_L(mat_t T, mat_t L);
 
+// x = Hx + g
+int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g);
+
 double mat_norm_1(mat_t A);
 double mat_norm_F(mat_t A);
 double mat_norm_inf(mat_t A);

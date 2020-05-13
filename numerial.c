@@ -1027,7 +1027,6 @@ int mat_reduction_llt_cholesky(mat_t L,mat_t A) {
 	return ret;
 }
 
-
 int mat_inv_L(mat_t T, mat_t L) {
 	MUST(L.m == L.n);
 	MUST(mat_is_same_size(T,L));
@@ -1059,4 +1058,9 @@ int mat_inv_L(mat_t T, mat_t L) {
 
 	HANDLE_MUST(ret);
 	return ret;
+}
+
+// x = Hx + g
+int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g) {
+	return 0;
 }

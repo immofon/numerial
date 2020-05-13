@@ -134,6 +134,17 @@ static int l_mat_assign(lua_State *L) {
 	return 1;
 }
 
+static int l_mat_transpose(lua_State *L) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	mat_t *T= (mat_t *) l_new_mat(L,A->n,A->m); // T.m == A.n, T.n == A.m
+
+	if(mat_transpose(*T,*A)) {
+		return 1;
+	}
+	luaL_error(L,"mat_transpose");
+	return 0;
+}
+
 static int l_mat_println(lua_State *L) {
 	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
 	const char *fmt = luaL_optstring(L,2,"");
@@ -282,6 +293,7 @@ static const struct luaL_Reg mat_metareg[] ={
 	{"set",l_mat_set},
 	{"println",l_mat_println},
 	{"assign",l_mat_assign},
+	{"transpose",l_mat_transpose},
 	{"qr",l_mat_qr_givens},
 	{"qr_givens",l_mat_qr_givens},
 	{"qr_household",l_mat_qr_household},
