@@ -1026,3 +1026,37 @@ int mat_reduction_llt_cholesky(mat_t L,mat_t A) {
 	HANDLE_MUST(ret);
 	return ret;
 }
+
+
+int mat_inv_L(mat_t T, mat_t L) {
+	MUST(L.m == L.n);
+	MUST(mat_is_same_size(T,L));
+
+	int i,j,k;
+	double sum;
+	int n = L.m;
+
+	init_mat(T,i,j,0);
+
+	range(i,1,n,1) {
+		MUST(mat_v(L,i,i)!=0);
+	}
+
+	mat_v(T,1,1) = 1/mat_v(L,1,1);
+
+	range(i,2,n,1) {
+		mat_v(T,i,i) = 1/mat_v(L,i,i);
+		for(j=i-1; j >= 1; j--) {
+			sum = 0;
+			range(k,j,i-1,1) {
+				sum += mat_v(L,i,k) * mat_v(T,k,j);
+			}
+
+			sum *= (-mat_v(T,i,i));
+			mat_v(T,i,j) = sum;
+		}
+	}
+
+	HANDLE_MUST(ret);
+	return ret;
+}

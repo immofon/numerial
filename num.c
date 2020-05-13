@@ -225,6 +225,18 @@ static int l_mat_solve_U(lua_State *L) {
 	return 0;
 }
 
+static int l_mat_inv_L(lua_State *L) {
+	mat_t *L1= (mat_t *) luaL_checkudata(L,1,MAT_T);
+	luaL_argcheck(L,L1->m==L1->n,1,"expect square matrix");
+
+	mat_t *T = (mat_t *) l_new_mat(L,L1->m,L1->n);
+	if(mat_inv_L(*T,*L1)) {
+		return 1;
+	}
+	luaL_error(L,"mat_inv_L");
+	return 0;
+}
+
 #define DOUBLE_EQUAL_DELTA 1e-10
 static int l_mat_equal(lua_State *L) {
 	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
@@ -278,6 +290,7 @@ static const struct luaL_Reg mat_metareg[] ={
 	{"llt_cholesky",l_mat_llt_cholesky},
 	{"solve_L",l_mat_solve_L},
 	{"solve_U",l_mat_solve_U},
+	{"inv_L",l_mat_inv_L},
 	{"__add",l_mat_add},
 	{"__sub",l_mat_sub},
 	{"__shl",l_mat_assign},

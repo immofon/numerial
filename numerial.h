@@ -114,6 +114,8 @@ int mat_reduction_plu_doolittle(mat_t P,mat_t L,mat_t U,mat_t A);
 // A must be a positive definite symmetric matrix
 int mat_reduction_llt_cholesky(mat_t L,mat_t A);
 
+int mat_inv_L(mat_t T, mat_t L);
+
 double mat_norm_1(mat_t A);
 double mat_norm_F(mat_t A);
 double mat_norm_inf(mat_t A);
