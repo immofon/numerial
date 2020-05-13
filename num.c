@@ -248,6 +248,40 @@ static int l_mat_inv_L(lua_State *L) {
 	return 0;
 }
 
+#define DEFAULT_ITER_STEP 10000
+#define DEFAULT_ITER_EPS 1e-10
+
+static int l_mat_solve_iter_simple(lua_State *L) {
+	mat_t *H= (mat_t *) luaL_checkudata(L,1,MAT_T);
+	luaL_argcheck(L,H->m==H->n,1,"expect square matrix");
+	mat_t *g= (mat_t *) luaL_checkudata(L,2,MAT_T);
+	luaL_argcheck(L,g->n == 1,2,"expect vector");
+	luaL_argcheck(L,H->n == g->m,2,"worry size vector");
+
+	mat_t *x = (mat_t *) l_new_mat(L,g->m,g->n);
+	if(mat_solve_iter_simple(*x,*H,*g,DEFAULT_ITER_STEP,DEFAULT_ITER_EPS)) {
+		return 1;
+	}
+	luaL_error(L,"mat_solve_iter_simple");
+	return 0;
+}
+
+
+static int l_mat_solve_iter_seidel(lua_State *L) {
+	mat_t *H= (mat_t *) luaL_checkudata(L,1,MAT_T);
+	luaL_argcheck(L,H->m==H->n,1,"expect square matrix");
+	mat_t *g= (mat_t *) luaL_checkudata(L,2,MAT_T);
+	luaL_argcheck(L,g->n == 1,2,"expect vector");
+	luaL_argcheck(L,H->n == g->m,2,"worry size vector");
+
+	mat_t *x = (mat_t *) l_new_mat(L,g->m,g->n);
+	if(mat_solve_iter_seidel(*x,*H,*g,DEFAULT_ITER_STEP,DEFAULT_ITER_EPS)) {
+		return 1;
+	}
+	luaL_error(L,"mat_solve_iter_seidel");
+	return 0;
+}
+
 #define DOUBLE_EQUAL_DELTA 1e-10
 static int l_mat_equal(lua_State *L) {
 	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
@@ -303,6 +337,8 @@ static const struct luaL_Reg mat_metareg[] ={
 	{"solve_L",l_mat_solve_L},
 	{"solve_U",l_mat_solve_U},
 	{"inv_L",l_mat_inv_L},
+	{"solve_iter_simple",l_mat_solve_iter_simple},
+	{"solve_iter_seidel",l_mat_solve_iter_seidel},
 	{"__add",l_mat_add},
 	{"__sub",l_mat_sub},
 	{"__shl",l_mat_assign},

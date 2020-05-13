@@ -117,7 +117,10 @@ int mat_reduction_llt_cholesky(mat_t L,mat_t A);
 int mat_inv_L(mat_t T, mat_t L);
 
 // x = Hx + g
-int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g);
+// if step <= 0, the iteraion will never stop until error < eps.
+// this may cause a dead loop, PLEASE be careful.
+int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,int max_step, double eps);
+int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,int max_step, double eps);
 
 double mat_norm_1(mat_t A);
 double mat_norm_F(mat_t A);

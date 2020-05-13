@@ -1061,6 +1061,81 @@ int mat_inv_L(mat_t T, mat_t L) {
 }
 
 // x = Hx + g
-int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g) {
-	return 0;
+// if step <= 0, the iteraion will never stop until error < eps.
+// this may cause a dead loop, PLEASE be careful.
+int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,int step, double eps) {
+	MUST(mat_is_same_size(x,g));
+	MUST(x.n == 1);
+	MUST(H.n == x.m);
+
+	if (eps <= 0) {
+		eps = 1e-10;
+	}
+
+	int i;
+	double tmp,m;
+
+	mat_t y = new_mat_vec(x.m);
+	for (; step != 0; step--) {
+		MUST(mat_product(y,H,x));
+		MUST(mat_add(y,y,g));
+
+		m = 0;
+		range(i,1,x.m,1) {
+			tmp = fabs(vec_v(y,i) - vec_v(x,i)) / (1 + fabs(vec_v(y,i)));
+			if (tmp > m) {
+				m = tmp;
+			}
+		}
+
+		MUST(mat_copy(x,y));
+		if (m < eps) {
+			MUST_return_ok();
+		}
+	}
+
+	MUST_return_error();
+	HANDLE_MUST(ret);
+	free_mat(&y);
+	return ret;
+}
+
+
+int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,int step, double eps) {
+	MUST(mat_is_same_size(x,g));
+	MUST(x.n == 1);
+	MUST(H.n == x.m);
+
+	if (eps <= 0) {
+		eps = 1e-10;
+	}
+
+	int i,j;
+	double tmp,m;
+
+
+	for (; step != 0; step--) {
+		m = 0;
+		range(i,1,H.m,1) {
+			tmp = vec_v(g,i);
+			range(j,1,H.m,1) {
+				tmp += mat_v(H,i,j)*vec_v(x,j);
+			}
+
+			if (fabs(tmp-vec_v(x,i)) > m) {
+				m =fabs(tmp-vec_v(x,i));
+			}
+
+			vec_v(x,i) = tmp;
+		}
+
+		if (m < eps) {
+			MUST_return_ok();
+		}
+	}
+
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	return ret;
 }
