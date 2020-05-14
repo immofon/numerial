@@ -122,6 +122,10 @@ int mat_inv_L(mat_t T, mat_t L);
 int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,int max_step, double eps);
 int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,int max_step, double eps);
 
+
+// eigenvalue & eigenvector
+int mat_eigen_power_method(double *eigen_v,mat_t eigen_vec,mat_t A,int max_step,double eps);
+
 double mat_norm_1(mat_t A);
 double mat_norm_F(mat_t A);
 double mat_norm_inf(mat_t A);

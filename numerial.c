@@ -1139,3 +1139,65 @@ int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,int step, double eps) {
 	HANDLE_MUST(ret);
 	return ret;
 }
+
+int mat_is_zero(mat_t A) {
+	int i,j;
+	mat_each(A,i,j) {
+		MUST(fabs(mat_v(A,i,j)) > 1e-10);
+	}
+	MUST_return_ok();
+	HANDLE_MUST(ret);
+	return !ret;
+}
+
+int mat_identify(mat_t A, double (*norm_f)(mat_t A)) {
+	MUST(norm_f != NULL);
+	double norm = (*norm_f)(A);
+	if (norm == 0) {
+		MUST_return_ok();
+	}
+
+	MUST(mat_scaler(A,A,1/norm));
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+
+int mat_eigen_power_method(double *eigen_v, mat_t eigen_vec,mat_t A,
+		int max_step,double eps) {
+	mat_t y = new_mat_vec(eigen_vec.m);
+
+	MUST(A.m ==  A.n);
+	MUST(A.n == eigen_vec.m);
+	MUST(eigen_vec.n == 1);
+
+	if (max_step <= 1) {
+		max_step = 1000;
+	}
+	if (eps <= 0) {
+		eps = 1e-10;
+	}
+
+	int i,j;
+	if(mat_is_zero(eigen_vec)) {
+		init_mat(eigen_vec,i,j,1);
+	}
+
+	range(i,1,max_step,1) {
+		MUST(mat_product(y,A,eigen_vec));
+		MUST(mat_identify(y,&vec_norm_inf));
+		MUST(mat_sub(eigen_vec,y,eigen_vec));
+		if(vec_norm_inf(eigen_vec) < eps) {
+			MUST(mat_copy(eigen_vec,y));
+			MUST(mat_product(y,A,eigen_vec));
+			*eigen_v = vec_v(y,1)/vec_v(eigen_vec,1);
+			MUST_return_ok();
+		}
+		MUST(mat_copy(eigen_vec,y));
+	}
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	free_mat(&y);
+	return ret;
+}
