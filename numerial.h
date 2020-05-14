@@ -38,6 +38,8 @@ typedef struct{
 	int used_step;
 } iter_conf_t;
 
+void init_iter_conf(iter_conf_t *conf);
+
 
 typedef struct{
 	int m;
@@ -128,8 +130,8 @@ int mat_inv_L(mat_t T, mat_t L);
 // x = Hx + g
 // if step <= 0, the iteraion will never stop until error < eps.
 // this may cause a dead loop, PLEASE be careful.
-int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,int max_step, double eps);
-int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,int max_step, double eps);
+int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,iter_conf_t *conf);
+int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,iter_conf_t *conf);
 
 
 // eigenvalue & eigenvector

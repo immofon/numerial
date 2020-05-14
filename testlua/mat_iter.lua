@@ -11,5 +11,5 @@ local g= mat.new(3,1):assign {1/8,2/5,-3/5}
 local x =  H:solve_iter_simple(g)
 assert(x == H*x + g)
 
-x = H:solve_iter_seidel(g)
+x = H:solve_iter_seidel(g, { tol=1e-10 })
 assert(x == H*x + g)

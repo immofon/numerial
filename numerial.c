@@ -12,6 +12,16 @@ void pause() {
 #endif
 }
 
+void init_iter_conf(iter_conf_t *conf) {
+	if (conf->max_step <= 1) {
+		conf->max_step = 1000;
+	}
+	if (conf->tol <= 0) {
+		conf->tol = 1e-10;
+	}
+	conf->used_step = 0;
+}
+
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
 // len(P) = n+1
 // n: degree of polynomial
@@ -1063,20 +1073,18 @@ int mat_inv_L(mat_t T, mat_t L) {
 // x = Hx + g
 // if step <= 0, the iteraion will never stop until error < eps.
 // this may cause a dead loop, PLEASE be careful.
-int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,int step, double eps) {
+int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,iter_conf_t *conf) {
 	MUST(mat_is_same_size(x,g));
 	MUST(x.n == 1);
 	MUST(H.n == x.m);
 
-	if (eps <= 0) {
-		eps = 1e-10;
-	}
+	init_iter_conf(conf);
 
 	int i;
 	double tmp,m;
 
 	mat_t y = new_mat_vec(x.m);
-	for (; step != 0; step--) {
+	range(conf->used_step,1,conf->max_step,1) {
 		MUST(mat_product(y,H,x));
 		MUST(mat_add(y,y,g));
 
@@ -1089,7 +1097,7 @@ int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,int step, double eps) {
 		}
 
 		MUST(mat_copy(x,y));
-		if (m < eps) {
+		if (m < conf->tol) {
 			MUST_return_ok();
 		}
 	}
@@ -1101,20 +1109,18 @@ int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,int step, double eps) {
 }
 
 
-int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,int step, double eps) {
+int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,iter_conf_t *conf) {
 	MUST(mat_is_same_size(x,g));
 	MUST(x.n == 1);
 	MUST(H.n == x.m);
 
-	if (eps <= 0) {
-		eps = 1e-10;
-	}
+	init_iter_conf(conf);
 
 	int i,j;
 	double tmp,m;
 
 
-	for (; step != 0; step--) {
+	range(conf->used_step,1,conf->max_step,1) {
 		m = 0;
 		range(i,1,H.m,1) {
 			tmp = vec_v(g,i);
@@ -1129,7 +1135,7 @@ int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,int step, double eps) {
 			vec_v(x,i) = tmp;
 		}
 
-		if (m < eps) {
+		if (m < conf->tol) {
 			MUST_return_ok();
 		}
 	}
@@ -1163,15 +1169,6 @@ int mat_identify(mat_t A, double (*norm_f)(mat_t A)) {
 	return ret;
 }
 
-void init_iter_conf(iter_conf_t *conf) {
-	if (conf->max_step <= 1) {
-		conf->max_step = 1000;
-	}
-	if (conf->tol <= 0) {
-		conf->tol = 1e-10;
-	}
-	conf->used_step = 0;
-}
 
 int mat_eigen_power_method(double *eigen_v,mat_t eigen_vec,mat_t A,iter_conf_t *conf) {
 	mat_t y = new_mat_vec(eigen_vec.m);

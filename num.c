@@ -248,8 +248,18 @@ static int l_mat_inv_L(lua_State *L) {
 	return 0;
 }
 
-#define DEFAULT_ITER_STEP 10000
-#define DEFAULT_ITER_EPS 1e-10
+// load table at index if exist.
+void opt_load_iter_conf(lua_State *L, int index, iter_conf_t *conf) {
+	if(lua_istable(L,index)) {
+		lua_getfield(L,index,"step");
+		conf->max_step = lua_tointeger(L,-1);
+		lua_pop(L,1);
+		lua_getfield(L,index,"tol");
+		conf->tol = (double)lua_tonumber(L,-1);
+		lua_pop(L,1);
+	}
+	init_iter_conf(conf);
+}
 
 static int l_mat_solve_iter_simple(lua_State *L) {
 	mat_t *H= (mat_t *) luaL_checkudata(L,1,MAT_T);
@@ -258,9 +268,12 @@ static int l_mat_solve_iter_simple(lua_State *L) {
 	luaL_argcheck(L,g->n == 1,2,"expect vector");
 	luaL_argcheck(L,H->n == g->m,2,"worry size vector");
 
+	iter_conf_t conf;
+	opt_load_iter_conf(L,3,&conf);
 	mat_t *x = (mat_t *) l_new_mat(L,g->m,g->n);
-	if(mat_solve_iter_simple(*x,*H,*g,DEFAULT_ITER_STEP,DEFAULT_ITER_EPS)) {
-		return 1;
+	if(mat_solve_iter_simple(*x,*H,*g,&conf)) {
+		lua_pushinteger(L,conf.used_step);
+		return 2;
 	}
 	luaL_error(L,"mat_solve_iter_simple");
 	return 0;
@@ -274,9 +287,12 @@ static int l_mat_solve_iter_seidel(lua_State *L) {
 	luaL_argcheck(L,g->n == 1,2,"expect vector");
 	luaL_argcheck(L,H->n == g->m,2,"worry size vector");
 
+	iter_conf_t conf;
+	opt_load_iter_conf(L,3,&conf);
 	mat_t *x = (mat_t *) l_new_mat(L,g->m,g->n);
-	if(mat_solve_iter_seidel(*x,*H,*g,DEFAULT_ITER_STEP,DEFAULT_ITER_EPS)) {
-		return 1;
+	if(mat_solve_iter_seidel(*x,*H,*g,&conf)) {
+		lua_pushinteger(L,conf.used_step);
+		return 2;
 	}
 	luaL_error(L,"mat_solve_iter_seidel");
 	return 0;
