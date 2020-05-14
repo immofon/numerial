@@ -13,10 +13,12 @@ int main() {
 	assert(mat_assign(A,A_v));
 
 	double eigenvalue = 0;
-	assert(mat_eigen_power_method(&eigenvalue,x,A,10000,1e-10));
+	iter_conf_t conf;
+	assert(mat_eigen_power_method(&eigenvalue,x,A,&conf));
 
 	mat_println(".12",x);
 	printf("eigen value: %.12lf\n",eigenvalue);
+	printf("iter step: %d\n",conf.used_step);
 
 	return 0;
 }

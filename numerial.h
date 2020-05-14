@@ -29,6 +29,15 @@ void pause();
 
 #define range(i,from,to,delta) for (i=(from);i<=(to);i+=(delta))
 
+typedef struct{
+	// set by caller
+	int max_step;
+	double tol;
+
+	// set by callee
+	int used_step;
+} iter_conf_t;
+
 
 typedef struct{
 	int m;
@@ -124,7 +133,7 @@ int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,int max_step, double eps);
 
 
 // eigenvalue & eigenvector
-int mat_eigen_power_method(double *eigen_v,mat_t eigen_vec,mat_t A,int max_step,double eps);
+int mat_eigen_power_method(double *eigen_v,mat_t eigen_vec,mat_t A,iter_conf_t *conf);
 
 double mat_norm_1(mat_t A);
 double mat_norm_F(mat_t A);

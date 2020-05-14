@@ -1163,31 +1163,35 @@ int mat_identify(mat_t A, double (*norm_f)(mat_t A)) {
 	return ret;
 }
 
-int mat_eigen_power_method(double *eigen_v, mat_t eigen_vec,mat_t A,
-		int max_step,double eps) {
+void init_iter_conf(iter_conf_t *conf) {
+	if (conf->max_step <= 1) {
+		conf->max_step = 1000;
+	}
+	if (conf->tol <= 0) {
+		conf->tol = 1e-10;
+	}
+	conf->used_step = 0;
+}
+
+int mat_eigen_power_method(double *eigen_v,mat_t eigen_vec,mat_t A,iter_conf_t *conf) {
 	mat_t y = new_mat_vec(eigen_vec.m);
 
 	MUST(A.m ==  A.n);
 	MUST(A.n == eigen_vec.m);
 	MUST(eigen_vec.n == 1);
 
-	if (max_step <= 1) {
-		max_step = 1000;
-	}
-	if (eps <= 0) {
-		eps = 1e-10;
-	}
+	init_iter_conf(conf);
 
 	int i,j;
 	if(mat_is_zero(eigen_vec)) {
 		init_mat(eigen_vec,i,j,1);
 	}
 
-	range(i,1,max_step,1) {
+	range(conf->used_step,1,conf->max_step,1) {
 		MUST(mat_product(y,A,eigen_vec));
 		MUST(mat_identify(y,&vec_norm_inf));
 		MUST(mat_sub(eigen_vec,y,eigen_vec));
-		if(vec_norm_inf(eigen_vec) < eps) {
+		if(vec_norm_inf(eigen_vec) < conf->tol) {
 			MUST(mat_copy(eigen_vec,y));
 			MUST(mat_product(y,A,eigen_vec));
 			*eigen_v = vec_v(y,1)/vec_v(eigen_vec,1);
