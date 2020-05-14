@@ -145,6 +145,19 @@ static int l_mat_transpose(lua_State *L) {
 	return 0;
 }
 
+static int l_mat_det(lua_State *L) {
+	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
+	luaL_argcheck(L,A->m==A->n,1,"expect square matrix");
+
+	double det = 0;
+	if(mat_det_lu(&det,*A,&mat_reduction_lu_doolittle)) {
+		lua_pushnumber(L,det);
+		return 1;
+	}
+	luaL_error(L,"mat_det_lu");
+	return 0;
+}
+
 static int l_mat_println(lua_State *L) {
 	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
 	const char *fmt = luaL_optstring(L,2,"");
@@ -344,6 +357,7 @@ static const struct luaL_Reg mat_metareg[] ={
 	{"println",l_mat_println},
 	{"assign",l_mat_assign},
 	{"transpose",l_mat_transpose},
+	{"det",l_mat_det},
 	{"qr",l_mat_qr_givens},
 	{"qr_givens",l_mat_qr_givens},
 	{"qr_household",l_mat_qr_household},
