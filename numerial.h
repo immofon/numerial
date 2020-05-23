@@ -133,6 +133,9 @@ int mat_inv_L(mat_t T, mat_t L);
 int mat_solve_iter_simple(mat_t x,mat_t H,mat_t g,iter_conf_t *conf);
 int mat_solve_iter_seidel(mat_t x,mat_t H,mat_t g,iter_conf_t *conf);
 
+int mat_solve_iter_jacobi(mat_t x,mat_t A,mat_t b,iter_conf_t *conf);
+int mat_solve_iter_gauss_seidel(mat_t x,mat_t A,mat_t b,iter_conf_t *conf);
+
 
 // eigenvalue & eigenvector
 int mat_eigen_power_method(double *eigen_v,mat_t eigen_vec,mat_t A,iter_conf_t *conf);

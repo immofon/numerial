@@ -1202,3 +1202,99 @@ int mat_eigen_power_method(double *eigen_v,mat_t eigen_vec,mat_t A,iter_conf_t *
 	free_mat(&y);
 	return ret;
 }
+
+
+int mat_solve_iter_jacobi(mat_t x,mat_t A,mat_t b,iter_conf_t *conf) {
+	mat_t y = new_mat_vec(x.m);
+
+	MUST(A.m == A.n);
+	MUST(A.n == b.m);
+	MUST(b.n == 1);;
+	MUST(mat_is_same_size(x,b));
+
+	init_iter_conf(conf);
+
+
+	int i,j;
+	int n = A.m;
+	double sum;
+	double m;
+
+	range(i,1,n,1) {
+		MUST(mat_v(A,i,i) != 0);
+	}
+
+	range(conf->used_step,1,conf->max_step,1) {
+		m = 0;
+		range(i,1,n,1) {
+			sum = -vec_v(b,i);
+			range(j,1,i-1,1) {
+				sum += mat_v(A,i,j) * vec_v(x,j);
+			}
+			range(j,i+1,n,1) {
+				sum += mat_v(A,i,j) * vec_v(x,j);
+			}
+			sum = -(sum/mat_v(A,i,i));
+
+			if (fabs(sum - vec_v(x,i)) > m) {
+				m =  fabs(sum - vec_v(x,i));
+			}
+			vec_v(y,i) = sum;
+		}
+		MUST(mat_copy(x,y));
+
+		if (m < conf->tol) {
+			MUST_return_ok();
+		}
+	}
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	free_mat(&y);
+	return ret;
+}
+int mat_solve_iter_gauss_seidel(mat_t x,mat_t A,mat_t b,iter_conf_t *conf) {
+	MUST(A.m == A.n);
+	MUST(A.n == b.m);
+	MUST(b.n == 1);;
+	MUST(mat_is_same_size(x,b));
+
+	init_iter_conf(conf);
+
+
+	int i,j;
+	int n = A.m;
+	double sum;
+	double m;
+
+	range(i,1,n,1) {
+		MUST(mat_v(A,i,i) != 0);
+	}
+
+	range(conf->used_step,1,conf->max_step,1) {
+		m = 0;
+		range(i,1,n,1) {
+			sum = -vec_v(b,i);
+			range(j,1,i-1,1) {
+				sum += mat_v(A,i,j) * vec_v(x,j);
+			}
+			range(j,i+1,n,1) {
+				sum += mat_v(A,i,j) * vec_v(x,j);
+			}
+			sum = -(sum/mat_v(A,i,i));
+
+			if (fabs(sum - vec_v(x,i)) > m) {
+				m =  fabs(sum - vec_v(x,i));
+			}
+			vec_v(x,i) = sum;
+		}
+
+		if (m < conf->tol) {
+			MUST_return_ok();
+		}
+	}
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	return ret;
+}
