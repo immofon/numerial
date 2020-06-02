@@ -5,6 +5,8 @@
 
 #define MAT_T "lua-num.mat"
 
+#define DOUBLE_EQUAL_DELTA 1e-10
+
 static int l_test(lua_State *L) {
 	printf("hello luatest\n");
 	return 0;
@@ -263,13 +265,19 @@ static int l_mat_inv_L(lua_State *L) {
 
 // load table at index if exist.
 void opt_load_iter_conf(lua_State *L, int index, iter_conf_t *conf) {
+	conf->used_step = 0;
+	conf->max_step = 0;
+	conf->tol = 0;
 	if(lua_istable(L,index)) {
 		lua_getfield(L,index,"step");
-		conf->max_step = lua_tointeger(L,-1);
+		conf->max_step = (int)lua_tointeger(L,-1);
 		lua_pop(L,1);
 		lua_getfield(L,index,"tol");
 		conf->tol = (double)lua_tonumber(L,-1);
 		lua_pop(L,1);
+	}
+	if (conf->tol == 0) {
+		conf->tol = DOUBLE_EQUAL_DELTA/10;
 	}
 	init_iter_conf(conf);
 }
@@ -357,13 +365,13 @@ static int l_mat_solve_iter_sor(lua_State *L) {
 	double factor = (double) luaL_checknumber(L,3);
 
 	iter_conf_t conf;
-	opt_load_iter_conf(L,3,&conf);
+	opt_load_iter_conf(L,4,&conf);
 	mat_t *x = (mat_t *) l_new_mat(L,b->m,b->n);
 	if(mat_solve_iter_sor(*x,*A,*b,factor,&conf)) {
 		lua_pushinteger(L,conf.used_step);
 		return 2;
 	}
-	luaL_error(L,"mat_solve_iter_gauss_seidel");
+	luaL_error(L,"mat_solve_iter_sor");
 	return 0;
 }
 
@@ -381,11 +389,28 @@ static int l_mat_solve_iter_steepest_descent(lua_State *L) {
 		lua_pushinteger(L,conf.used_step);
 		return 2;
 	}
-	luaL_error(L,"mat_solve_iter_gauss_seidel");
+	luaL_error(L,"mat_solve_iter_steepest_descent");
 	return 0;
 }
 
-#define DOUBLE_EQUAL_DELTA 1e-10
+static int l_mat_solve_iter_conjugate_gradient(lua_State *L) {
+	mat_t *A= (mat_t *) luaL_checkudata(L,1,MAT_T);
+	luaL_argcheck(L,A->m==A->n,1,"expect square matrix");
+	mat_t *b= (mat_t *) luaL_checkudata(L,2,MAT_T);
+	luaL_argcheck(L,b->n == 1,2,"expect vector");
+	luaL_argcheck(L,A->n == b->m,2,"worry size vector");
+
+	iter_conf_t conf;
+	opt_load_iter_conf(L,3,&conf);
+	mat_t *x = (mat_t *) l_new_mat(L,b->m,b->n);
+	if(mat_solve_iter_conjugate_gradient(*x,*A,*b,&conf)) {
+		lua_pushinteger(L,conf.used_step);
+		return 2;
+	}
+	luaL_error(L,"mat_solve_iter_conjugate_gradient");
+	return 0;
+}
+
 static int l_mat_equal(lua_State *L) {
 	mat_t *A = (mat_t *) luaL_checkudata(L,1,MAT_T);
 	mat_t *B = (mat_t *) luaL_checkudata(L,2,MAT_T);
@@ -447,6 +472,7 @@ static const struct luaL_Reg mat_metareg[] ={
 	{"solve_iter_gauss_seidel",l_mat_solve_iter_gauss_seidel},
 	{"solve_iter_sor",l_mat_solve_iter_sor},
 	{"solve_iter_steepest_descent",l_mat_solve_iter_steepest_descent},
+	{"solve_iter_conjugate_gradient",l_mat_solve_iter_conjugate_gradient},
 	{"__add",l_mat_add},
 	{"__sub",l_mat_sub},
 	{"__shl",l_mat_assign},

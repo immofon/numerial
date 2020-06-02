@@ -13,8 +13,6 @@ local A = mat.new(6,6):assign {
 local xc = mat.new(6,1):assign {1,8,0,4,3,5}
 local b = A*xc
 
-A:println "4.1"
-
 function is_symmetric(A)
 	for i=1,6 do
 		for j=i+1,6 do
@@ -26,7 +24,7 @@ function is_symmetric(A)
 	return true
 end
 
-print("A is_symmetric",is_symmetric(A))
+assert(is_symmetric(A))
 
 function solve(A,b)
 	P,L,U = A:plu()
@@ -35,8 +33,10 @@ function solve(A,b)
 end
 
 local x = solve(A,b)
-x:println()
+assert(A*x == b)
 
-local x,n = A:solve_iter_steepest_descent(b, { tol=1e-6,max_step=2000 })
-x:println()
-print(n)
+x = A:solve_iter_steepest_descent(b)
+assert(A*x == b)
+
+x = A:solve_iter_conjugate_gradient(b,{tol=1e-10})
+assert(A*x == b)

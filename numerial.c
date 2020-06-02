@@ -16,7 +16,7 @@ void init_iter_conf(iter_conf_t *conf) {
 	if (conf->max_step <= 1) {
 		conf->max_step = 1000;
 	}
-	if (conf->tol <= 0) {
+	if (conf->tol <= 1e-12) {
 		conf->tol = 1e-10;
 	}
 	conf->used_step = 0;
