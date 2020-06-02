@@ -1342,5 +1342,123 @@ int mat_solve_iter_sor(mat_t x,mat_t A,mat_t b,double factor,iter_conf_t *conf) 
 
 	HANDLE_MUST(ret);
 	return ret;
-
 }
+
+
+int vec_inner_product(double *v, mat_t x,mat_t y) {
+	MUST(x.m == y.m);
+	MUST(x.n == 1);
+	MUST(y.n == 1);
+
+	double sum = 0;
+	int i;
+	range(i,1,x.m,1) {
+		sum += vec_v(x,i) * vec_v(y,i);
+	}
+	*v = sum;
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+
+
+int mat_solve_iter_steepest_descent(mat_t x,mat_t A,mat_t b,iter_conf_t *conf) {
+	mat_t r = new_mat_vec(b.m);
+	mat_t Ar = new_mat_vec(b.m);
+	mat_t ar = new_mat_vec(b.m);
+
+	MUST(A.m == A.n);
+	MUST(A.n == b.m);
+	MUST(b.n == 1);;
+	MUST(mat_is_same_size(x,b));
+
+	init_iter_conf(conf);
+
+	double a;
+	double au,al;
+
+	MUST(mat_product(r,A,x));
+	MUST(mat_sub(r,b,r));
+
+	range(conf->used_step,1,conf->max_step,1) {
+		MUST(mat_product(Ar,A,r));
+		MUST(vec_inner_product(&au,r,r));
+		MUST(vec_inner_product(&al,Ar,r));
+		MUST(al != 0);
+		a = au/al;
+		MUST(mat_scaler(ar,r,a));
+		MUST(mat_add(x,x,ar));
+		MUST(mat_scaler(Ar,Ar,a));
+		MUST(mat_sub(r,r,Ar));
+		if (vec_norm_inf(r) < conf->tol) {
+			MUST_return_ok();
+		}
+	}
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	free_mat(&r);
+	free_mat(&Ar);
+	free_mat(&ar);
+	return ret;
+}
+
+int mat_solve_iter_conjugate_gradient(mat_t x,mat_t A,mat_t b,iter_conf_t *conf) {
+	mat_t r = new_mat_vec(b.m);
+	mat_t p = new_mat_vec(b.m);
+	mat_t Ap = new_mat_vec(b.m);
+	mat_t ap = new_mat_vec(b.m);
+	mat_t aAp = new_mat_vec(b.m);
+
+	MUST(A.m == A.n);
+	MUST(A.n == b.m);
+	MUST(b.n == 1);;
+	MUST(mat_is_same_size(x,b));
+
+	init_iter_conf(conf);
+
+	double a,c;
+	double au,al,cu;
+
+	MUST(mat_product(r,A,x));
+	MUST(mat_sub(r,b,r));
+
+	if (vec_norm_inf(r) < conf->tol) {
+		MUST_return_ok();
+	}
+
+	MUST(mat_copy(p,r));
+
+	range(conf->used_step,1,conf->max_step,1) {
+		MUST(mat_product(Ap,A,p));
+		MUST(vec_inner_product(&au,r,p));
+		MUST(vec_inner_product(&al,p,Ap));
+		MUST(al != 0);
+		a = au/al;
+		MUST(mat_scaler(ap,p,a));
+		MUST(mat_add(x,x,ap));
+		MUST(mat_scaler(aAp,Ap,a));
+		MUST(mat_sub(r,r,aAp));
+
+		if (vec_norm_inf(r) < conf->tol) {
+			MUST_return_ok();
+		}
+
+		MUST(vec_inner_product(&cu,r,Ap));
+
+		c = -cu/al;
+
+		MUST(mat_scaler(p,p,c));
+		MUST(mat_add(p,r,p));
+	}
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	free_mat(&r);
+	free_mat(&p);
+	free_mat(&Ap);
+	free_mat(&ap);
+	free_mat(&aAp);
+	return ret;
+}
+

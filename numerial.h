@@ -138,6 +138,9 @@ int mat_solve_iter_gauss_seidel(mat_t x,mat_t A,mat_t b,iter_conf_t *conf);
 
 int mat_solve_iter_sor(mat_t x,mat_t A,mat_t b,double factor,iter_conf_t *conf);
 
+int mat_solve_iter_steepest_descent(mat_t x,mat_t A,mat_t b,iter_conf_t *conf);
+int mat_solve_iter_conjugate_gradient(mat_t x,mat_t A,mat_t b,iter_conf_t *conf);
+
 // eigenvalue & eigenvector
 int mat_eigen_power_method(double *eigen_v,mat_t eigen_vec,mat_t A,iter_conf_t *conf);
 
@@ -151,7 +154,7 @@ double vec_norm_1(mat_t A);
 double vec_norm_2(mat_t A);
 double vec_norm_inf(mat_t A);
 
-
+int vec_inner_product(double *v,mat_t x,mat_t y);
 
 
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
