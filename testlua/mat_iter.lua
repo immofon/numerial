@@ -25,3 +25,7 @@ assert(A * x == b)
 
 x = A:solve_iter_gauss_seidel(b)
 assert(A * x == b)
+
+x = A:solve_iter_gauss_seidel(b,1.005)
+assert(A * x == b)
+
