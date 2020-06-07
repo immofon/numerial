@@ -39,5 +39,7 @@ int main() {
 	test("x = sqrt(x + 2)",f2);
 	test("x = 1 + 2/x",f3);
 	test("x = (x*x + 2) / (2*x - 1)",f4);
+
+	pause();
 	return 0;
 }
