@@ -156,6 +156,14 @@ double vec_norm_inf(mat_t A);
 
 int vec_inner_product(double *v,mat_t x,mat_t y);
 
+// root
+typedef double (*fn_t)(double x);
+
+int root_bisection(double* root,fn_t fn,double a,double b,iter_conf_t *conf);
+
+// You MUST set *x as init value, otherwise, BUG will occur.
+int root_iter_fixed_point(double *x, fn_t fn,iter_conf_t *conf);
+
 
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
 // len(P) = n+1

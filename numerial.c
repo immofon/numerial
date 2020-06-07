@@ -1462,3 +1462,78 @@ int mat_solve_iter_conjugate_gradient(mat_t x,mat_t A,mat_t b,iter_conf_t *conf)
 	return ret;
 }
 
+int sgn(double v) {
+	if (v > 0) {
+		return 1;
+	}else if (v == 0) {
+		return 0;
+	}else {
+		return -1;
+	}
+}
+
+
+int root_bisection(double* root,fn_t fn,double a,double b,iter_conf_t *conf){
+	init_iter_conf(conf);
+
+	double p,fa,fb;
+	if (a > b) {
+		p = a;
+		a = b;
+		b = p;
+	}
+
+	fa = (*fn)(a);
+	fb = (*fn)(b);
+	range(conf->used_step,1,conf->max_step,1) {
+		if (fa == 0) {
+			*root = a;
+			MUST_return_ok();
+		}
+		if (fb == 0) {
+			*root = b;
+			MUST_return_ok();
+		}
+
+		if (sgn(fa)*sgn(fb) > 0) {
+			MUST_return_error();
+		}
+
+		p = (*fn)((a+b)/2);
+
+		if (p == 0 || (b-a)/2 < conf->tol) {
+			*root = (a+b)/2;
+			MUST_return_ok();
+		}
+		if (sgn(p)*sgn(fa) < 0) {
+			b = (a+b)/2;
+			fb = p;
+		}else {
+			a = (a+b)/2;
+			fa = p;
+		}
+	}
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+
+int root_iter_fixed_point(double *x, fn_t fn,iter_conf_t *conf) {
+	init_iter_conf(conf);
+
+	double x1 = (*fn)(*x);
+
+	range(conf->used_step,1,conf->max_step,1) {
+		if (fabs(x1- (*x))/(1+fabs(x1)) < conf->tol) {
+			*x = x1;
+			MUST_return_ok();
+		}
+		*x = x1;
+		x1 = (*fn)(x1);
+	}
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	return ret;
+}
