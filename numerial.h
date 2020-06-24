@@ -11,16 +11,16 @@ void pause();
 // return with resouce free
 #define HANDLE_MUST(varname) int varname;\
 	if(0==0){ \
-		OK: \
+		NUM_OK: \
 		varname = 1; \
 	}else { \
-		ERROR: \
+		NUM_ERROR: \
 		varname = 0; \
 	}
 
-#define MUST_return_ok() goto OK
-#define MUST_return_error() {fprintf(stderr,"error: %s:%d %s()\n",__FILE__,__LINE__,__func__);goto ERROR;}
-#define MUST(exp) if(!(exp)) {MUST_return_error();}
+#define MUST_return_ok() goto NUM_OK
+#define MUST_return_error() {fprintf(stderr,"%s:%d\t%s()\n",__FILE__,__LINE__,__func__);goto NUM_ERROR;}
+#define MUST(exp) if(!(exp)) {fprintf(stderr,"%s:%d\t%s\n",__FILE__,__LINE__,#exp);goto NUM_ERROR;}
 
 #define new(type,size) ((type *) malloc(sizeof(type)*(size)))
 
