@@ -5,25 +5,6 @@
 #define N  2
 
 
-double mat_norm_1(mat_t mat) {
-	double norm = 0.0;
-	int i,j;
-
-	mat_each(mat,i,j) {
-		norm += fabs(mat_v(mat,i,j));
-	}
-	return norm;
-}
-
-double mat_norm_2(mat_t mat) {
-	double norm = 0.0;
-	int i,j;
-
-	mat_each(mat,i,j) {
-		norm += mat_v(mat,i,j)*mat_v(mat,i,j);
-	}
-	return sqrt(norm);
-}
 
 
 int main() {
@@ -71,7 +52,6 @@ int main() {
 	mat_t W = new_mat(2,1);
 	assert(mat_product(W,B,V));
 	mat_println("",W);
-
 	mat_t I = new_mat(10,10);
 	init_mat(I,i,j,i==j?1:0);
 	mat_println(".0",I);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #include <assert.h>
 #include <time.h>
@@ -18,7 +19,7 @@ void pause();
 	}
 
 #define MUST_return_ok() goto OK
-#define MUST_return_error() goto ERROR
+#define MUST_return_error() {fprintf(stderr,"error: %s:%d %s()\n",__FILE__,__LINE__,__func__);goto ERROR;}
 #define MUST(exp) if(!(exp)) {MUST_return_error();}
 
 #define new(type,size) ((type *) malloc(sizeof(type)*(size)))
@@ -164,6 +165,11 @@ int root_bisection(double* root,fn_t fn,double a,double b,iter_conf_t *conf);
 // You MUST set *x as init value, otherwise, BUG will occur.
 int root_iter_fixed_point(double *x, fn_t fn,iter_conf_t *conf);
 
+// fn : f(x)
+// fn1: f'(x)
+int root_iter_newton(double *x, fn_t fn, fn_t fn1, iter_conf_t *conf);
+
+int root_iter_newton_down(double *x, fn_t f,fn_t f1,double min_lambda,double x_delta,iter_conf_t *conf);
 
 // Pn(x) = a[0]*x^n + a[1]*x^(n-1) + ... + a[n]
 // len(P) = n+1

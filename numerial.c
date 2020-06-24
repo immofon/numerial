@@ -137,15 +137,12 @@ int mat_is_identical(mat_t A,mat_t B) {
 // return: 0(error) 1(ok)
 // ADVICE: assert(mat_product(R,A,B);
 int mat_product(mat_t R,mat_t A,mat_t B) {
+	MUST(!mat_is_identical(R,A));
+	MUST(!mat_is_identical(R,B));
+	MUST(R.m == A.m && R.n == B.n && A.n == B.m);
 
 	int i,j,k;
 	double sum;
-	if(mat_is_identical(R,A) || mat_is_identical(R,B)) {
-		return 0;
-	}
-	if (R.m != A.m || R.n != B.n || A.n != B.m) {
-		return 0;
-	}
 
 	range(i,1,A.m,1) range(j,1,B.n,1) {
 		sum = 0;
@@ -154,7 +151,9 @@ int mat_product(mat_t R,mat_t A,mat_t B) {
 		}
 		mat_v(R,i,j) = sum;
 	}
-	return 1;
+
+	HANDLE_MUST(ret);
+	return ret;
 }
 
 
@@ -1531,6 +1530,72 @@ int root_iter_fixed_point(double *x, fn_t fn,iter_conf_t *conf) {
 		}
 		*x = x1;
 		x1 = (*fn)(x1);
+	}
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+
+
+int root_iter_newton(double *x, fn_t fn, fn_t fn1, iter_conf_t *conf) {
+	init_iter_conf(conf);
+
+	double fx = (*fn)(*x);
+	double f1x = (*fn1)(*x);
+	double x1= 0;
+
+	range(conf->used_step,1,conf->max_step,1) {
+		MUST(f1x != 0);
+		x1 = *x - fx/f1x;
+		if (fabs(fx) < conf->tol && fabs(*x - x1) < conf->tol) {
+			*x = x1;
+			MUST_return_ok();
+		}
+
+		*x = x1;
+		fx = (*fn)(*x);
+		f1x = (*fn1)(*x);
+	}
+	MUST_return_error();
+
+	HANDLE_MUST(ret);
+	return ret;
+}
+
+int root_iter_newton_down(double *x, fn_t fn,fn_t fn1,double min_lambda,double x_delta,iter_conf_t *conf) {
+	init_iter_conf(conf);
+
+	MUST(min_lambda > 0);
+
+	double lambda = 1;
+	double fx = 0;
+	double f1x = 0;
+	double x1= 0;
+
+	range(conf->used_step,1,conf->max_step,1) {
+		fx = (*fn)(*x);
+		f1x = (*fn1)(*x);
+		MUST(f1x != 0);
+		x1 = *x - (lambda * fx)/f1x;
+		if (fabs((*fn)(x1)) < fabs(fx)) {
+			if (fabs(*x - x1) < conf->tol){
+				*x = x1;
+				MUST_return_ok();
+			}else {
+				*x = x1;
+			}
+		}else {
+			if (lambda <= min_lambda ) {
+				if (fabs((*fn)(x1)) < conf->tol) {
+					MUST_return_ok();
+				}else {
+					*x = x1 + x_delta;
+				}
+			}else {
+				lambda /= 2;
+			}
+		}
 	}
 	MUST_return_error();
 
