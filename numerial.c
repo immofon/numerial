@@ -1602,3 +1602,28 @@ int root_iter_newton_down(double *x, fn_t fn,fn_t fn1,double min_lambda,double x
 	HANDLE_MUST(ret);
 	return ret;
 }
+
+// The x and y MUST be vectors and have the same size.
+int itp_lagrange(double *y, mat_t X,mat_t Y,double x){
+	MUST(mat_is_same_size(X,Y));
+	MUST(X.n == 1);
+
+	int i,j;
+	double l;
+
+	*y = 0;
+
+	range(i,1,X.m,1) {
+		l = 1;
+		range(j,1,X.m,1) {
+			if (i != j) {
+				MUST(vec_v(X,i) != vec_v(X,j));
+				l *= (x-vec_v(X,j)) / (vec_v(X,i)-vec_v(X,j));
+			}
+		}
+		*y += l * vec_v(Y,i);
+	}
+
+	HANDLE_MUST(ret);
+	return ret;
+}

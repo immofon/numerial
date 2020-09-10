@@ -180,3 +180,8 @@ double poly_value(double a[],int n, double x);
 double* exp_taylor(int n);
 
 double vec_dot_product(double a[], double b[], int dim);
+
+// The "itp_" prefix means that interpolation.
+
+// The x and y MUST be vectors and have the same size.
+int itp_lagrange(double *y, mat_t X,mat_t Y,double x);
