@@ -31,7 +31,7 @@ void pause();
     goto NUM_ERROR;                                                            \
   }
 
-#define new (type, size)((type *)malloc(sizeof(type) * (size)))
+#define newm(type, size) ((type *)malloc(sizeof(type) * (size)))
 
 // i: int, after each{}, i should equal to n
 // n: int, MUST greater than 0.

@@ -38,7 +38,7 @@ double poly_value(double a[], int n, double x) {
 // MUST free after use its return.
 double *exp_taylor(int n) {
   // double *a = (double *)malloc(sizeof(double)*(n+1));
-  double *a = new (double, n + 1);
+  double *a = newm(double, n + 1);
   int i;
   a[n] = 1;
   for (i = n - 1; i >= 0; i--) {
@@ -60,8 +60,10 @@ void print_double(const char *format, double v) {
   int i;
 
   size_t len = strlen(format) + 3 + 1; // "%lf" =>  3
-  char *fmt = new (char, len);
-  each(i, len) { fmt[i] = 0; }
+  char *fmt = newm(char, len);
+  for (i = 0; i < len; i++) {
+    fmt[i] = 0;
+  }
 
   strcat(fmt, "%");
   strcat(fmt, format);
@@ -80,7 +82,7 @@ mat_t new_mat(int m, int n) {
   mat_t mat;
   mat.m = m;
   mat.n = n;
-  mat.data = new (double, m *n);
+  mat.data = newm(double, m *n);
   init_mat(mat, i, j, 0);
   return mat;
 }
