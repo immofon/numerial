@@ -421,7 +421,149 @@ int mat_solve_iter_jacobi(mat_t x, mat_t A, mat_t b, iter_conf_t *conf) {
   return ret;
 }
 
-int main() {
+int find_index(mat_t X, double x) {
+  assert(X.n == 1);
+  assert(X.m >= 2);
+
+  int i;
+
+  if (x <= vec_v(X, 1)) {
+    return 1;
+  }
+
+  range(i, 1, X.m - 1, 1) {
+    if (vec_v(X, i) <= x && x <= vec_v(X, i + 1)) {
+      return i;
+    }
+    //
+  }
+
+  return X.m - 1;
+}
+
+double cubic_spline_intp(mat_t X, mat_t Y, mat_t M, double x) {
+  assert(X.n == 1);
+  assert(X.m >= 2);
+  assert(mat_is_same_size(X, M));
+
+  int i = find_index(X, x);
+
+  double h, t;
+  double v = 0;
+
+  h = vec_v(X, i + 1) - vec_v(X, i); // h_{i+1}
+  t = x - vec_v(X, i);               // x - x_i
+  v += (vec_v(Y, i + 1) - vec_v(M, i + 1) * h * h / 6) * t / h;
+  v += t * t * t * vec_v(M, i + 1) / (6 * h);
+
+  t = x - vec_v(X, i + 1); // x - x_{i+1}
+  v -= (vec_v(Y, i) - vec_v(M, i) * h * h / 6) * t / h;
+  v -= t * t * t * vec_v(M, i) / (6 * h);
+
+  return v;
+}
+
+mat_t new_mat_vec_uniform_partition(int n, double a, double b) {
+  assert(n >= 2);
+  assert(a < b);
+
+  mat_t X = new_mat_vec(n);
+  double h = (b - a) / (n - 1);
+  int i;
+  range(i, 1, n, 1) {
+    vec_v(X, i) = a + (i - 1) * h;
+    //
+  }
+  vec_v(X, n) = b;
+
+  return X;
+}
+
+mat_t new_mat_function_image(mat_t X, double (*f)(double x)) {
+  mat_t Y = new_mat(X.m, X.n);
+  int i, j;
+
+  mat_each(X, i, j) { mat_v(Y, i, j) = (*f)(mat_v(X, i, j)); }
+
+  return Y;
+}
+
+// You should set boundary condition before solve the equation
+mat_t new_mat_cubic_intp_A(mat_t X, mat_t Y) {
+  assert(X.m >= 2);
+  assert(X.n == 1);
+  assert(mat_is_same_size(X, Y));
+
+  int n = X.m;
+  mat_t A = new_mat(n, n);
+  int i;
+  range(i, 1, n - 2, 1) {
+    mat_v(A, i + 1, i) =
+        (vec_v(X, i + 1) - vec_v(X, i)) / (vec_v(X, i + 2) - vec_v(X, i));
+    mat_v(A, i + 1, i + 1) = 2;
+    mat_v(A, i + 1, i + 2) = 1 - mat_v(A, i + 1, i);
+  }
+  return A;
+}
+mat_t new_mat_vec_cubic_intp_d(mat_t X, mat_t Y) {
+  assert(X.m >= 2);
+  assert(X.n == 1);
+  assert(mat_is_same_size(X, Y));
+
+  int n = X.m;
+  mat_t d = new_mat_vec(n);
+  int i;
+
+  range(i, 1, n - 2, 1) {
+    vec_v(d, i + 1) =
+        6 *
+        (((vec_v(Y, i + 2) - vec_v(Y, i + 1)) /
+          (vec_v(X, i + 2) - vec_v(X, i + 1))) -
+         ((vec_v(Y, i + 1) - vec_v(Y, i)) / (vec_v(X, i + 1) - vec_v(X, i)))) /
+        (vec_v(X, i + 2) - vec_v(X, i));
+  }
+
+  return d;
+}
+
+void cubic_intp_set_clamped_boundary(mat_t A, mat_t d, mat_t X, mat_t Y,
+                                     double dy1, double dyn) {
+  int n = A.m;
+  assert(A.m == A.n);
+  assert(d.m == n);
+  assert(n >= 2);
+  assert(d.n == 1);
+  assert(mat_is_same_size_3(d, X, Y));
+
+  mat_v(A, 1, 1) = 2;
+  mat_v(A, 1, 2) = 1;
+  mat_v(A, n, n - 1) = 1;
+  mat_v(A, n, n) = 2;
+
+  double h = vec_v(X, 2) - vec_v(X, 1);
+  vec_v(d, 1) = 6 * ((vec_v(Y, 2) - vec_v(Y, 1)) / h - dy1) / h;
+  h = vec_v(X, n) - vec_v(X, n - 1);
+  vec_v(d, n) = 6 * (dyn - (vec_v(Y, n) - vec_v(Y, n - 1)) / h) / h;
+}
+
+void cubic_intp_set_natural_boundary(mat_t A, mat_t d, mat_t X, mat_t Y) {
+  int n = A.m;
+  assert(A.m == A.n);
+  assert(d.m == n);
+  assert(n >= 2);
+  assert(d.n == 1);
+  assert(mat_is_same_size_3(d, X, Y));
+
+  mat_v(A, 1, 1) = 2;
+  mat_v(A, 1, 2) = 0;
+  mat_v(A, n, n - 1) = 0;
+  mat_v(A, n, n) = 2;
+
+  vec_v(d, 1) = 0;
+  vec_v(d, n) = 0;
+}
+
+int test_solve() {
   double A_v[] = {
       2, 0, 0, //
       0, 2, 0, //
@@ -448,4 +590,51 @@ int main() {
 
   mat_println(".8", x);
   return 0;
+}
+
+double f(double x) { return x * x * x * x * x; }
+
+int test(int n) {
+  int a = -1;
+  int b = 1;
+  int N = 10000;
+  mat_t xx = new_mat_vec_uniform_partition(N, a, b);
+  mat_t X = new_mat_vec_uniform_partition(n, a, b);
+  mat_t Y = new_mat_function_image(X, &f);
+  double dy1 = 0;
+  double dyn = 5;
+
+  mat_t A = new_mat_cubic_intp_A(X, Y);
+  mat_t d = new_mat_vec_cubic_intp_d(X, Y);
+  cubic_intp_set_clamped_boundary(A, d, X, Y, dy1, dyn);
+  // cubic_intp_set_natural_boundary(A, d, X, Y);
+  mat_t M = new_mat_vec(d.m);
+
+  // mat_println(".6", A);
+  // mat_println(".6", d);
+
+  iter_conf_t conf;
+  conf.tol = 1e-17;
+  conf.max_step = 1000;
+  assert(mat_solve_iter_jacobi(M, A, d, &conf));
+
+  double v;
+  v = cubic_spline_intp(X, Y, M, 1.0 / 3.0);
+  printf("n = %d; err = %.10e\n", n, v - f(1.0 / 3.0));
+
+  FILE *io = fopen("spline.dat", "w");
+  int i;
+  range(i, 1, N, 1) {
+    v = cubic_spline_intp(X, Y, M, vec_v(xx, i));
+    fprintf(io, "%e\t%e\n", vec_v(xx, i), v - f(vec_v(xx, i)));
+    // fprintf(io, "%e\t%e\n", vec_v(xx, i), v);
+  }
+  fclose(io);
+
+  return 0;
+}
+
+int main() {
+  int i;
+  range(i, 2, 1000, 1) { test(i); }
 }
